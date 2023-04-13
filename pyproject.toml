@@ -1,0 +1,36 @@
+[build-system]
+requires = ['flit_core >=3.2,<4']
+build-backend = 'flit_core.buildapi'
+
+[project]
+name = 'konsepy'
+dynamic = ['version', 'description']
+authors = [
+    { name = 'dcronkite', email = 'dcronkite+pypi@gmail.com' },
+]
+readme = 'README.md'
+dependencies = [
+    'loguru',
+    'pytest',
+    'sas7bdat',
+]
+requires-python = '>=3.10'
+keywords = [
+    'nlp',
+]
+classifiers = [# https://pypi.org/classifiers/
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Science/Research',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Topic :: Text Processing :: Linguistic',
+    'License :: OSI Approved :: MIT License',
+    'Intended Audience :: Healthcare Industry',
+]
+
+[project.urls]
+Home = 'https://github.com/kpwhri/konsepy'
+
+[project.optional-dependencies]
+ssplit = ['spacy']
