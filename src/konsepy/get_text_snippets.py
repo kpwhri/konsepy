@@ -13,7 +13,7 @@ from konsepy.textio import iterate_csv_file
 def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, stop_after=None, window_size=50,
                               id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                               notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
-                              select_probability=1.0, label='snippets', stop_after_regex_count=None):
+                              select_probability=1.0, label='snippets', stop_after_regex_count=None, **kwargs):
     dt = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     logger.warning('Snippets will have spaces normalized:'
                    ' multiple spaces/newlines/tabs will be converted'
@@ -30,7 +30,8 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
                 select_probability=select_probability
         ):
             text = ' '.join(text.split())  # remove newlines, etc. (bad for snippets in Excel)
-            for name, regex in regexes:
+            for regex_ in regexes:
+                name, regex = regex_.split('==')
                 if isinstance(regex, str):
                     regex = re.compile(regex, re.I)
                 for m in regex.finditer(text):
