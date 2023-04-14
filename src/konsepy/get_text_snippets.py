@@ -51,15 +51,14 @@ def get_text_snippets(input_files, outdir, regexes, *, start_after=0, stop_after
                         return
 
 
-def get_text_snippets_for_concept_algorithm(package, input_files, outdir, *, concept_name=None, start_after=0,
-                                            stop_after=None,
-                                            window_size=50, regexes=None,
+def get_text_snippets_for_concept_algorithm(package, input_files, outdir, *, concepts=None,
+                                            start_after=0, stop_after=None, window_size=50,
                                             id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                                             notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
                                             select_probability=1.0, label='snippets', stop_after_regex_count=None,
                                             **kwargs):
     regexes = [(regex, category)
-               for concept in get_all_concepts(package, concept_name)
+               for concept in get_all_concepts(package, *concepts)
                for regex, category in concept.regexes]
 
     get_text_snippets(input_files, outdir, regexes,
@@ -78,9 +77,8 @@ def get_text_snippets_for_concept_algorithm(package, input_files, outdir, *, con
 
 if __name__ == '__main__':
     kwargs = snippet_cli()
-    kwargs['label'] = kwargs.get('concept_name', 'concept')
 
-    if kwargs.get('concept_name', None):
+    if kwargs.get('concepts', None):
         get_text_snippets_for_concept_algorithm(**kwargs)
     else:
         get_text_snippets(**kwargs)

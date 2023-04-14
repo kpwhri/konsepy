@@ -12,8 +12,6 @@ def concept_cli(func):
 
 def snippet_cli():
     parser = argparse.ArgumentParser(fromfile_prefix_chars='@!')
-    parser.add_argument('--concept-name', dest='concept_name', required=True,
-                        help='Name of concept to run regexes for.')
     parser.add_argument('--regexes', nargs='+',
                         help=r'REGEX_NAME==(?:re(?:gex)\sto\s(?:search|look)\sfor')
     parser.add_argument('--stop-after-regex-count', dest='stop_after_regex_count', default=None,
@@ -24,6 +22,8 @@ def snippet_cli():
 
 def add_common_cli(parser: argparse.ArgumentParser):
     add_outdir_and_infiles(parser)
+    parser.add_argument('--concepts', nargs='+',
+                        help='Name of concepts to process/run regular expressions for.')
     parser.add_argument('--require-regex', default=None,
                         help='Output text containing this regex but in which no regexes were found.')
     parser.add_argument('--start-after', default=0, type=int,
