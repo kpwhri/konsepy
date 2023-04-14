@@ -3,6 +3,7 @@ import re
 from collections import Counter, defaultdict
 
 from konsepy.constants import NOTEDATE_LABEL, ID_LABEL, NOTEID_LABEL, NOTETEXT_LABEL
+from konsepy.importer import get_all_concepts
 from konsepy.textio import iterate_csv_file, output_results
 from loguru import logger
 
@@ -64,25 +65,27 @@ def extract_categories(mrn, note_id, text, regex_func, *,
             not_found_text[' '.join(text.split())] += 1
 
 
-def run_regex_and_output(name, input_files, outdir, regex_func, *category_enums,
+def run_regex_and_output(package_name, input_files, outdir, *concepts,
                          start_after=0, stop_after=None, require_regex=None, window_size=50,
                          id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                          notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
                          select_probability=1.0):
     dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    curr_outdir = outdir / f'{name}_{dt}'
-    curr_outdir.mkdir(parents=True)
-    logger.add(curr_outdir / f'{name}_{dt}.log')
-    note_counter, cat_counter_mrns, not_found_text, mrn_to_cat, note_to_cat = run_regex_on_files(
-        input_files, regex_func, start_after=start_after, stop_after=stop_after, require_regex=require_regex,
-        window_size=window_size,
-        id_label=id_label, noteid_label=noteid_label,
-        notedate_label=notedate_label, notetext_label=notetext_label,
-        select_probability=select_probability
-    )
-    output_results(curr_outdir, not_found_text=not_found_text, note_counter=note_counter,
-                   cat_counter_mrns=cat_counter_mrns, category_enums=category_enums,
-                   note_to_cat=note_to_cat, mrn_to_cat=mrn_to_cat)
+    for iconcept in get_all_concepts(package_name, *concepts):
+        curr_outdir = outdir / f'{iconcept.name}_{dt}'
+        curr_outdir.mkdir(parents=True)
+        logger.add(curr_outdir / f'{iconcept.name}_{dt}.log')
+        note_counter, cat_counter_mrns, not_found_text, mrn_to_cat, note_to_cat = run_regex_on_files(
+            input_files, iconcept.run_func,
+            start_after=start_after, stop_after=stop_after, require_regex=require_regex,
+            window_size=window_size,
+            id_label=id_label, noteid_label=noteid_label,
+            notedate_label=notedate_label, notetext_label=notetext_label,
+            select_probability=select_probability
+        )
+        output_results(curr_outdir, not_found_text=not_found_text, note_counter=note_counter,
+                       cat_counter_mrns=cat_counter_mrns, category_enums=[iconcept.category_enum],
+                       note_to_cat=note_to_cat, mrn_to_cat=mrn_to_cat)
 
 
 def search_first_regex(regexes):

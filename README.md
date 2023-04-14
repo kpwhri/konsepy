@@ -7,4 +7,7 @@ Framework for build NLP information extraction systems using regular expressions
 
 For now, find documentation for this library (and a template to download) from https://github.com/kpwhri/konsepy.
 
-* Download the template
+
+## Roadmap
+
+* Change labels to some metadata object to allow more diverse input sources and run info
