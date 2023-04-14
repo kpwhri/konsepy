@@ -55,6 +55,8 @@ def get_bio_tags(input_files, outdir: Path, *, package_name: str = None, regexes
     # prepare sentence splitter
     nlp = get_pipeline(sentence_model)
 
+    if not package_name and not regexes:
+        raise ValueError(f'Either `regexes` or `package_name` must be specified.')
     regexes = regexes or build_regex_dict(package_name)
 
     with (

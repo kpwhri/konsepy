@@ -22,6 +22,8 @@ def snippet_cli():
 
 def add_common_cli(parser: argparse.ArgumentParser):
     add_outdir_and_infiles(parser)
+    parser.add_argument('--package-name', dest='package_name',
+                        help='Name of package to run regular expressions from.')
     parser.add_argument('--concepts', nargs='+',
                         help='Name of concepts to process/run regular expressions for.')
     parser.add_argument('--require-regex', default=None,

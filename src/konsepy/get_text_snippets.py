@@ -10,10 +10,10 @@ from konsepy.importer import get_all_concepts
 from konsepy.textio import iterate_csv_file
 
 
-def get_text_snippets(input_files, outdir, regexes, *, start_after=0, stop_after=None, window_size=50,
-                      id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
-                      notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
-                      select_probability=1.0, label='snippets', stop_after_regex_count=None):
+def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, stop_after=None, window_size=50,
+                              id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
+                              notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
+                              select_probability=1.0, label='snippets', stop_after_regex_count=None):
     dt = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     logger.warning('Snippets will have spaces normalized:'
                    ' multiple spaces/newlines/tabs will be converted'
@@ -61,24 +61,29 @@ def get_text_snippets_for_concept_algorithm(package, input_files, outdir, *, con
                for concept in get_all_concepts(package, *concepts)
                for regex, category in concept.regexes]
 
-    get_text_snippets(input_files, outdir, regexes,
-                      start_after=start_after,
-                      stop_after=stop_after,
-                      window_size=window_size,
-                      select_probability=select_probability,
-                      id_label=id_label,
-                      noteid_label=noteid_label,
-                      notedate_label=notedate_label,
-                      notetext_label=notetext_label,
-                      label=label,
-                      stop_after_regex_count=stop_after_regex_count,
-                      )
+    get_text_snippets_regexes(input_files, outdir, regexes,
+                              start_after=start_after,
+                              stop_after=stop_after,
+                              window_size=window_size,
+                              select_probability=select_probability,
+                              id_label=id_label,
+                              noteid_label=noteid_label,
+                              notedate_label=notedate_label,
+                              notetext_label=notetext_label,
+                              label=label,
+                              stop_after_regex_count=stop_after_regex_count,
+                              )
+
+
+def get_text_snippets_cli(package_name=None):
+    kwargs = snippet_cli()
+    kwargs['package_name'] = kwargs.get('package_name', package_name)
+
+    if package_name and kwargs.get('concepts', None):
+        get_text_snippets_for_concept_algorithm(**kwargs)
+    else:
+        get_text_snippets_regexes(**kwargs)
 
 
 if __name__ == '__main__':
-    kwargs = snippet_cli()
-
-    if kwargs.get('concepts', None):
-        get_text_snippets_for_concept_algorithm(**kwargs)
-    else:
-        get_text_snippets(**kwargs)
+    get_text_snippets_cli()
