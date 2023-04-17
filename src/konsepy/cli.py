@@ -48,9 +48,9 @@ def add_outdir_and_infiles(parser: argparse.ArgumentParser = None):
     parser.add_argument('--id-label', default=ID_LABEL,
                         help='Column label for individual id')
     parser.add_argument('--noteid-label', default=NOTEID_LABEL,
-                        help='Column label for individual id')
+                        help='Column label for note id')
     parser.add_argument('--notedate-label', default=NOTEDATE_LABEL,
-                        help='Column label for individual id')
+                        help='Column label for date of note')
     parser.add_argument('--notetext-label', default=NOTETEXT_LABEL,
-                        help='Column label for individual id')
+                        help='Column label for note text')
     return parser
