@@ -13,14 +13,16 @@ from konsepy.constants import NOTEDATE_LABEL, ID_LABEL, NOTEID_LABEL, NOTETEXT_L
 def iterate_csv_file(input_files, *, start_after=0, stop_after=None,
                      id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                      notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
+                     noteorder_label=None,
                      select_probability=1.0, encoding='latin1'):
     """Return count, mrn, note_id, text for each row in csv file"""
     count = 0
     total_count = 0
     for input_file in input_files:
         func = _extract_sas_file if input_file.endswith('sas7bdat') else _extract_csv_file
-        for mrn, text, note_id, date in func(input_file, encoding, id_label, noteid_label, notedate_label,
-                                             notetext_label):
+        for mrn, text, note_id, date in _deline_lines(
+                func, input_file, encoding, id_label, noteid_label,
+                notedate_label, notetext_label, noteorder_label):
             if random.random() > select_probability:
                 continue
             total_count += 1
@@ -32,7 +34,39 @@ def iterate_csv_file(input_files, *, start_after=0, stop_after=None,
                 return
 
 
-def _extract_sas_file(input_file, encoding, id_label, noteid_label, notedate_label, notetext_label):
+def _deline_lines(func, input_file, encoding, mrn_label, noteid_label,
+                  notedate_label, notetext_label, noteorder_label=None):
+    # variables for delining notes
+    curr_id = None
+    curr_mrn = None
+    curr_date = None
+    curr_doc = []
+    for mrn, text, note_id, date, order in func(
+            input_file, encoding, mrn_label, noteid_label, notedate_label,
+            notetext_label, noteorder_label
+    ):
+        if not order:  # skip delining
+            yield mrn, text, note_id, date
+        else:
+            if curr_id is None:
+                curr_id = note_id
+                curr_mrn = mrn
+                curr_date = date
+            elif note_id != curr_id:
+                yield curr_mrn, ' '.join(text for _, _, text in sorted(curr_doc)), curr_id, curr_date
+                curr_id = note_id
+                curr_mrn = mrn
+                curr_date = date
+                curr_doc = []
+            if isinstance(text, float) or not text:
+                continue  # skip empty text
+            curr_doc.append((note_id, order, text))  # keep track of all text associated with this note
+    if curr_id is not None:
+        yield curr_mrn, ' '.join(text for _, _, text in sorted(curr_doc)), curr_id, curr_date
+
+
+def _extract_sas_file(input_file, encoding, id_label, noteid_label,
+                      notedate_label, notetext_label, noteorder_label=None):
     with SAS7BDAT(input_file, skip_header=False, encoding=encoding) as fh:
         header = []
         for row in fh:
@@ -43,17 +77,20 @@ def _extract_sas_file(input_file, encoding, id_label, noteid_label, notedate_lab
             date = row[header.index(notedate_label)] if notedate_label else ''
             text = row[header.index(noteid_label)]
             noteid = row[header.index(notetext_label)]
-            yield mrn, text, noteid, date
+            order = row[header.index(noteorder_label)] if noteorder_label else None
+            yield mrn, text, noteid, date, order
 
 
-def _extract_csv_file(input_file, encoding, id_label, noteid_label, notedate_label, notetext_label):
+def _extract_csv_file(input_file, encoding, id_label, noteid_label, notedate_label,
+                      notetext_label, noteorder_label=None):
     with open(input_file, encoding=encoding) as fh:
         for row in csv.DictReader(fh):
             text = row[notetext_label]
             mrn = row[id_label]
             date = row.get(notedate_label, '')
             note_id = row[noteid_label]
-            yield mrn, text, note_id, date
+            order = row.get(noteorder_label, '')
+            yield mrn, text, note_id, date, order
 
 
 def output_results(outdir, *, not_found_text=None,

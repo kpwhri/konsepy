@@ -14,6 +14,7 @@ from konsepy.textio import iterate_csv_file, output_results
 def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
             id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
             notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
+            noteorder_label=None,
             ):
     dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     curr_outdir = outdir / f'run_all_{dt}'
@@ -31,6 +32,7 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
             input_files,
             id_label=id_label, noteid_label=noteid_label,
             notedate_label=notedate_label, notetext_label=notetext_label,
+            noteorder_label=noteorder_label,
     ):
         if count % 10000 == 0:
             logger.info(f'Completed {count} records for {len(unique_mrns)} MRNs ({datetime.datetime.now()})')

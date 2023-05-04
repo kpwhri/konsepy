@@ -13,6 +13,7 @@ from konsepy.textio import iterate_csv_file
 def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, stop_after=None, window_size=50,
                               id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                               notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
+                              noteorder_label=None,
                               select_probability=1.0, label='snippets', stop_after_regex_count=None, **kwargs):
     dt = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     logger.warning('Snippets will have spaces normalized:'
@@ -27,7 +28,8 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
                 input_files, start_after=start_after, stop_after=stop_after,
                 id_label=id_label, noteid_label=noteid_label,
                 notetext_label=notetext_label, notedate_label=notedate_label,
-                select_probability=select_probability
+                noteorder_label=noteorder_label,
+                select_probability=select_probability,
         ):
             text = ' '.join(text.split())  # remove newlines, etc. (bad for snippets in Excel)
             for regex_ in regexes:
@@ -56,6 +58,7 @@ def get_text_snippets_for_concept_algorithm(package, input_files, outdir, *, con
                                             start_after=0, stop_after=None, window_size=50,
                                             id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                                             notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
+                                            noteorder_label=None,
                                             select_probability=1.0, label='snippets', stop_after_regex_count=None,
                                             **kwargs):
     regexes = [(regex, category)
@@ -71,6 +74,7 @@ def get_text_snippets_for_concept_algorithm(package, input_files, outdir, *, con
                               noteid_label=noteid_label,
                               notedate_label=notedate_label,
                               notetext_label=notetext_label,
+                              noteorder_label=noteorder_label,
                               label=label,
                               stop_after_regex_count=stop_after_regex_count,
                               )

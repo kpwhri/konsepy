@@ -15,6 +15,13 @@ Types of changes:
 * `Fixed`: for any bug fixes.
 * `Security`: in case of vulnerabilities.
 
+## [0.0.6] - 2023-05-04
+
+### Added
+
+* Added `noteorder_label` to allow notes to appear in a delined form (with multiple rows for a note)
+
+
 ## [0.0.5] - 2023-04-17
 
 ### Fixed

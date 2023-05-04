@@ -46,7 +46,8 @@ def build_regex_dict(package_name):
 def get_bio_tags(input_files, outdir: Path, *, package_name: str = None, regexes: RegexDict = None,
                  sentence_model='senter',
                  id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
-                 notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL):
+                 notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
+                 noteorder_label=None):
     """
 
     """

@@ -53,4 +53,6 @@ def add_outdir_and_infiles(parser: argparse.ArgumentParser = None):
                         help='Column label for date of note')
     parser.add_argument('--notetext-label', default=NOTETEXT_LABEL,
                         help='Column label for note text')
+    parser.add_argument('--noteorder-label', default=None,
+                        help='Specify column that enumerates the order of multiple parts of a single note.')
     return parser
