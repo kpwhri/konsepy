@@ -20,7 +20,7 @@ Types of changes:
 ### Added
 
 * Added `noteorder_label` to allow notes to appear in a delined form (with multiple rows for a note)
-
+* Powershell script to test konsepy_nlp_template tutorial
 
 ## [0.0.5] - 2023-04-17
 
