@@ -1,6 +1,6 @@
 import importlib
 import pkgutil
-from enum import EnumType
+from enum import EnumMeta  # from: EnumType
 from pathlib import Path
 
 from loguru import logger
