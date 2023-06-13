@@ -1,6 +1,6 @@
 import importlib
 import pkgutil
-from enum import EnumMeta  # from: EnumType
+from enum import EnumMeta
 from pathlib import Path
 
 from loguru import logger
@@ -28,7 +28,7 @@ class ConceptImport:
 
     def _get_category(self):
         for name, value in self.imp.__dict__.items():
-            if isinstance(value, EnumType):
+            if isinstance(value, EnumMeta):
                 return value
         raise ValueError(f'Unable to identify category enum for concept "{self.name}".')
 
