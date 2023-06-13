@@ -12,7 +12,7 @@ def run_regex_on_files(input_files, regex_func, *, start_after=0, stop_after=Non
                        require_regex=None, window_size=50,
                        id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                        notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
-                       select_probability=1.0):
+                       noteorder_label=None, select_probability=1.0):
     count = 0  # default value; received from forloop below
     cat_counter_notes = Counter()
     cat_counter_mrns = defaultdict(set)
@@ -26,7 +26,7 @@ def run_regex_on_files(input_files, regex_func, *, start_after=0, stop_after=Non
             input_files, start_after=start_after, stop_after=stop_after,
             id_label=id_label, noteid_label=noteid_label,
             notedate_label=notedate_label, notetext_label=notetext_label,
-            select_probability=select_probability
+            noteorder_label=noteorder_label, select_probability=select_probability,
     ):
         if count % 10000 == 0:
             logger.info(
@@ -69,7 +69,7 @@ def run_regex_and_output(package_name, input_files, outdir, *concepts,
                          start_after=0, stop_after=None, require_regex=None, window_size=50,
                          id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                          notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
-                         select_probability=1.0):
+                         noteorder_label=None, select_probability=1.0):
     dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     for iconcept in get_all_concepts(package_name, *concepts):
         curr_outdir = outdir / f'{iconcept.name}_{dt}'
@@ -81,7 +81,7 @@ def run_regex_and_output(package_name, input_files, outdir, *concepts,
             window_size=window_size,
             id_label=id_label, noteid_label=noteid_label,
             notedate_label=notedate_label, notetext_label=notetext_label,
-            select_probability=select_probability
+            noteorder_label=noteorder_label, select_probability=select_probability,
         )
         output_results(curr_outdir, not_found_text=not_found_text, note_counter=note_counter,
                        cat_counter_mrns=cat_counter_mrns, category_enums=[iconcept.category_enum],

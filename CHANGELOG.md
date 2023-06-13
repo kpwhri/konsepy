@@ -15,6 +15,13 @@ Types of changes:
 * `Fixed`: for any bug fixes.
 * `Security`: in case of vulnerabilities.
 
+## [0.0.7] & [0.0.8] - 2023-06-13
+
+### Fixed
+
+* Fixed where `noteorder_label` didn't yet get correctly passed around
+* `enum.EnumType` is only available in 3.11+, so reverted to old `enum.EnumMeta`
+
 ## [0.0.6] - 2023-05-04
 
 ### Added

@@ -73,7 +73,7 @@ def get_bio_tags(input_files, outdir: Path, *, package_name: str = None, regexes
         for doc, (count, studyid, note_id, note_date) in nlp.pipe(format_for_spacy(
                 iterate_csv_file(
                     input_files, id_label=id_label, noteid_label=noteid_label, notedate_label=notedate_label,
-                    notetext_label=notetext_label,
+                    notetext_label=notetext_label, noteorder_label=noteorder_label,
                 )
         ), as_tuples=True):
             constant_meta = {
