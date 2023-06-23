@@ -15,6 +15,12 @@ Types of changes:
 * `Fixed`: for any bug fixes.
 * `Security`: in case of vulnerabilities.
 
+## [0.0.9] - 2023-06-23
+
+### Fixed
+
+* When checking SAS columns, check for its presence in the header rather than if it is None since it has a default value
+
 ## [0.0.7] & [0.0.8] - 2023-06-13
 
 ### Fixed
