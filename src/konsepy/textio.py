@@ -75,8 +75,8 @@ def _extract_sas_file(input_file, encoding, id_label, noteid_label,
                 continue
             mrn = row[header.index(id_label)]
             date = row[header.index(notedate_label)] if notedate_label and notedate_label in header else ''
-            text = row[header.index(noteid_label)]
-            noteid = row[header.index(notetext_label)]
+            noteid = row[header.index(noteid_label)]
+            text = row[header.index(notetext_label)]
             order = row[header.index(noteorder_label)] if noteorder_label and noteorder_label in header else None
             yield mrn, text, noteid, date, order
 

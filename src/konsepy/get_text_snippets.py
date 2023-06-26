@@ -33,7 +33,12 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
         ):
             text = ' '.join(text.split())  # remove newlines, etc. (bad for snippets in Excel)
             for regex_ in regexes:
-                name, regex = regex_.split('==')
+                if isinstance(regex_, str):
+                    name, regex = regex_.split('==')
+                elif isinstance(regex_, tuple):
+                    name, regex = regex_
+                else:
+                    raise ValueError(f'Unknown how to handle regular expression of type {type(regex_)}: {regex_}')
                 if isinstance(regex, str):
                     regex = re.compile(regex, re.I)
                 for m in regex.finditer(text):
@@ -54,15 +59,15 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
                         return
 
 
-def get_text_snippets_for_concept_algorithm(package, input_files, outdir, *, concepts=None,
+def get_text_snippets_for_concept_algorithm(package_name, input_files, outdir, *, concepts=None,
                                             start_after=0, stop_after=None, window_size=50,
                                             id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                                             notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
                                             noteorder_label=None,
                                             select_probability=1.0, label='snippets', stop_after_regex_count=None,
                                             **kwargs):
-    regexes = [(regex, category)
-               for concept in get_all_concepts(package, *concepts)
+    regexes = [(category, regex)
+               for concept in get_all_concepts(package_name, *concepts)
                for regex, category in concept.regexes]
 
     get_text_snippets_regexes(input_files, outdir, regexes,
@@ -82,7 +87,7 @@ def get_text_snippets_for_concept_algorithm(package, input_files, outdir, *, con
 
 def get_text_snippets_cli(package_name=None):
     kwargs = snippet_cli()
-    kwargs['package_name'] = kwargs.get('package_name', package_name)
+    kwargs['package_name'] = kwargs.get('package_name', package_name) or package_name
 
     if package_name and kwargs.get('concepts', None):
         get_text_snippets_for_concept_algorithm(**kwargs)
