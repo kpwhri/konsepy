@@ -15,6 +15,12 @@ Types of changes:
 * `Fixed`: for any bug fixes.
 * `Security`: in case of vulnerabilities.
 
+## [0.0.10] - 2023-06-26
+
+### Fixed
+
+* Created sas7bdat file for testing and fixed a number of issues in the SAS pipeline
+
 ## [0.0.9] - 2023-06-23
 
 ### Fixed
