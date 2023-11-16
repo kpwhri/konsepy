@@ -22,6 +22,10 @@ Types of changes:
 * Read `jsonl` corpus
 * Add incremental output (especially for memory-constrained environments/large corpora) with option to turn off collection of aggregate data.
 
+### Fixed
+
+* Fixed logic for getting text snippets for concepts so that specifying no concepts results in getting all concepts. 
+
 ## [0.0.10] - 2023-06-26
 
 ### Fixed
