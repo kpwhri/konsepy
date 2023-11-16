@@ -70,7 +70,7 @@ def get_text_snippets_for_concept_algorithm(package_name, input_files, outdir, *
         concepts = list()
     regexes = [(category, regex)
                for concept in get_all_concepts(package_name, *concepts)
-               for regex, category in concept.regexes]
+               for regex, category, *_ in concept.regexes]
 
     get_text_snippets_regexes(input_files, outdir, regexes,
                               start_after=start_after,
