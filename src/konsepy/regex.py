@@ -42,11 +42,12 @@ def run_regex_on_files(input_files, regex_func, *, start_after=0, stop_after=Non
     return cat_counter_notes, cat_counter_mrns, not_found_text, mrn_to_cat, noteid_to_cat
 
 
-def extract_categories(mrn, note_id, text, regex_func, *,
+def extract_categories(mrn, note_id, text, regex_func, *, categories=None,
                        cat_counter_mrns=None, cat_counter_notes=None, mrn_to_cat=None,
                        not_found_text=None, noteid_to_cat=None,
                        require_regex=None, unique_mrns=None, window_size=50):
-    categories = list(regex_func(text))
+    if not categories:
+        categories = list(regex_func(text))
     for category in categories:
         mrn_to_cat[mrn][category] += 1
         noteid_to_cat[(mrn, note_id)][category] += 1

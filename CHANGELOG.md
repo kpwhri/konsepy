@@ -20,7 +20,7 @@ Types of changes:
 ### Added
 
 * Read `jsonl` corpus
-
+* Add incremental output (especially for memory-constrained environments/large corpora) with option to turn off collection of aggregate data.
 
 ## [0.0.10] - 2023-06-26
 
