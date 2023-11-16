@@ -41,15 +41,14 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
 
             for concept in concepts:
                 categories = list(concept.run_func(text))
-                for category in categories:
-                    out.write(json.dumps({
-                        'studyid': studyid,
-                        'note_id': note_id,
-                        'note_date': note_date,
-                        'text': text,
-                        'concept': concept,
-                        'category': category,
-                    }) + '\n')
+                out.write(json.dumps({
+                    'studyid': studyid,
+                    'note_id': note_id,
+                    'note_date': note_date,
+                    'text': text,
+                    'concept': concept.name,
+                    'categories': [category.name for category in categories],
+                }) + '\n')
                 if not incremental_output_only:
                     extract_categories(
                         studyid, note_id, text, concept.run_func, categories=categories,
