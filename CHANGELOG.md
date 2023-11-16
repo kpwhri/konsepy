@@ -17,6 +17,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.0.11] - 2023-11-16
+
 ### Added
 
 * Read `jsonl` corpus
