@@ -120,3 +120,20 @@ def get_all_regex_by_index(regexes):
                 yield category.name, m.group(), m.start(), m.end()
 
     return _get_all_regex_by_index
+
+
+def search_all_regex_match_func(regexes):
+    """For each regex, apply a function on the match object to get result"""
+
+    def _search_all_regex(text):
+        for regex, category, *other in regexes:
+            func = None
+            if len(other) > 0:
+                func = other[0]
+            for m in regex.finditer(text):
+                if func and (res := func(m)):
+                    yield res
+                else:
+                    yield category
+
+    return _search_all_regex

@@ -21,6 +21,7 @@ Types of changes:
 
 * Read `jsonl` corpus
 * Add incremental output (especially for memory-constrained environments/large corpora) with option to turn off collection of aggregate data.
+* Search regexes and apply a function on the match to determine result category.  
 
 ### Fixed
 
