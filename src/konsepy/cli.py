@@ -63,3 +63,5 @@ def add_run_all_args(parser: argparse.ArgumentParser = None):
         parser = argparse.ArgumentParser(fromfile_prefix_chars='@!')
     parser.add_argument('--incremental-output-only', action='store_true', default=False,
                         help='Do not retain summarized output, just output incremental jsonl file.')
+    parser.add_argument('--concepts', nargs='+', default=False,
+                        help='Look for these particular concepts.')
