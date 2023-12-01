@@ -15,6 +15,13 @@ Types of changes:
 * `Fixed`: for any bug fixes.
 * `Security`: in case of vulnerabilities.
 
+
+## [Unreleased]
+
+### Added
+
+* Convert jsonl file to `datasets.DatasetDict` for processing with `transformers` library
+
 ## [0.0.10] - 2023-06-26
 
 ### Fixed
