@@ -56,3 +56,12 @@ def add_outdir_and_infiles(parser: argparse.ArgumentParser = None):
     parser.add_argument('--noteorder-label', default=None,
                         help='Specify column that enumerates the order of multiple parts of a single note.')
     return parser
+
+
+def add_run_all_args(parser: argparse.ArgumentParser = None):
+    if not parser:
+        parser = argparse.ArgumentParser(fromfile_prefix_chars='@!')
+    parser.add_argument('--incremental-output-only', action='store_true', default=False,
+                        help='Do not retain summarized output, just output incremental jsonl file.')
+    parser.add_argument('--concepts', nargs='+', default=False,
+                        help='Look for these particular concepts.')

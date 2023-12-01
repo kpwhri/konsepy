@@ -66,9 +66,11 @@ def get_text_snippets_for_concept_algorithm(package_name, input_files, outdir, *
                                             noteorder_label=None,
                                             select_probability=1.0, label='snippets', stop_after_regex_count=None,
                                             **kwargs):
+    if concepts is None:
+        concepts = list()
     regexes = [(category, regex)
                for concept in get_all_concepts(package_name, *concepts)
-               for regex, category in concept.regexes]
+               for regex, category, *_ in concept.regexes]
 
     get_text_snippets_regexes(input_files, outdir, regexes,
                               start_after=start_after,
@@ -89,7 +91,7 @@ def get_text_snippets_cli(package_name=None):
     kwargs = snippet_cli()
     kwargs['package_name'] = kwargs.get('package_name', package_name) or package_name
 
-    if package_name and kwargs.get('concepts', None):
+    if package_name and kwargs.get('regexes', None) is None:
         get_text_snippets_for_concept_algorithm(**kwargs)
     else:
         get_text_snippets_regexes(**kwargs)

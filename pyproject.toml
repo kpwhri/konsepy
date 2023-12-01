@@ -12,7 +12,6 @@ readme = 'README.md'
 dependencies = [
     'loguru',
     'pytest',
-    'sas7bdat',
 ]
 requires-python = '>=3.10'
 keywords = [
@@ -34,4 +33,5 @@ Home = 'https://github.com/kpwhri/konsepy'
 
 [project.optional-dependencies]
 ssplit = ['spacy']
+sas = ['sas7bdat']
 model = ['datasets']

@@ -42,11 +42,12 @@ def run_regex_on_files(input_files, regex_func, *, start_after=0, stop_after=Non
     return cat_counter_notes, cat_counter_mrns, not_found_text, mrn_to_cat, noteid_to_cat
 
 
-def extract_categories(mrn, note_id, text, regex_func, *,
+def extract_categories(mrn, note_id, text, regex_func, *, categories=None,
                        cat_counter_mrns=None, cat_counter_notes=None, mrn_to_cat=None,
                        not_found_text=None, noteid_to_cat=None,
                        require_regex=None, unique_mrns=None, window_size=50):
-    categories = list(regex_func(text))
+    if not categories:
+        categories = list(regex_func(text))
     for category in categories:
         mrn_to_cat[mrn][category] += 1
         noteid_to_cat[(mrn, note_id)][category] += 1
@@ -119,3 +120,20 @@ def get_all_regex_by_index(regexes):
                 yield category.name, m.group(), m.start(), m.end()
 
     return _get_all_regex_by_index
+
+
+def search_all_regex_match_func(regexes):
+    """For each regex, apply a function on the match object to get result"""
+
+    def _search_all_regex(text):
+        for regex, category, *other in regexes:
+            func = None
+            if len(other) > 0:
+                func = other[0]
+            for m in regex.finditer(text):
+                if func and (res := func(m)):
+                    yield res
+                else:
+                    yield category
+
+    return _search_all_regex

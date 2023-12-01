@@ -2,10 +2,10 @@
 Simplify reading input files by creating an iterating wrapper.
 """
 import csv
+import json
 import random
 
 from loguru import logger
-from sas7bdat import SAS7BDAT
 
 from konsepy.constants import NOTEDATE_LABEL, ID_LABEL, NOTEID_LABEL, NOTETEXT_LABEL
 
@@ -19,7 +19,13 @@ def iterate_csv_file(input_files, *, start_after=0, stop_after=None,
     count = 0
     total_count = 0
     for input_file in input_files:
-        func = _extract_sas_file if input_file.endswith('sas7bdat') else _extract_csv_file
+        func = None
+        if input_file.endswith('sas7bdat'):
+            func = _extract_sas_file
+        elif input_file.endswith(('csv', 'tsv')):
+            func = _extract_csv_file
+        elif input_file.endswith('jsonl'):
+            func = _extract_jsonl_file
         for mrn, text, note_id, date in _deline_lines(
                 func, input_file, encoding, id_label, noteid_label,
                 notedate_label, notetext_label, noteorder_label):
@@ -67,6 +73,7 @@ def _deline_lines(func, input_file, encoding, mrn_label, noteid_label,
 
 def _extract_sas_file(input_file, encoding, id_label, noteid_label,
                       notedate_label, notetext_label, noteorder_label=None):
+    from sas7bdat import SAS7BDAT
     with SAS7BDAT(input_file, skip_header=False, encoding=encoding) as fh:
         header = []
         for row in fh:
@@ -90,6 +97,19 @@ def _extract_csv_file(input_file, encoding, id_label, noteid_label, notedate_lab
             date = row.get(notedate_label, '')
             note_id = row[noteid_label]
             order = row.get(noteorder_label, '')
+            yield mrn, text, note_id, date, order
+
+
+def _extract_jsonl_file(input_file, encoding, id_label, noteid_label, notedate_label,
+                        notetext_label, noteorder_label=None):
+    with open(input_file, encoding=encoding) as fh:
+        for line in fh:
+            data = json.loads(line.strip())
+            text = data[notetext_label]
+            mrn = data[id_label]
+            date = data.get(notedate_label, '')
+            note_id = data[noteid_label]
+            order = data.get(noteorder_label, '')
             yield mrn, text, note_id, date, order
 
 

@@ -22,6 +22,18 @@ Types of changes:
 
 * Convert jsonl file to `datasets.DatasetDict` for processing with `transformers` library
 
+## [0.0.11] - 2023-11-16
+
+### Added
+
+* Read `jsonl` corpus
+* Add incremental output (especially for memory-constrained environments/large corpora) with option to turn off collection of aggregate data.
+* Search regexes and apply a function on the match to determine result category.  
+
+### Fixed
+
+* Fixed logic for getting text snippets for concepts so that specifying no concepts results in getting all concepts. 
+
 ## [0.0.10] - 2023-06-26
 
 ### Fixed
