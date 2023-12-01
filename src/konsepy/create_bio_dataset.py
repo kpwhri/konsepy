@@ -1,3 +1,5 @@
+import argparse
+import datetime
 import json
 from pathlib import Path
 from datasets import Dataset, Sequence
@@ -92,4 +94,23 @@ def create_bio_dataset(path: Path, outpath: Path, test_size=0.1, validation_size
     denom = length * test_size
     ds = res['train'].train_test_split(test_size=num / denom, shuffle=True)
     ds['validation'] = res['test']
-    ds.save_to_disk(outpath)
+    ds.save_to_disk(outpath / f'{path.stem}.{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.dataset')
+
+
+def create_bio_dataset_args():
+    parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
+    parser.add_argument('path', type=Path,
+                        help='Path to jsonl input file.')
+    parser.add_argument('outpath', type=Path,
+                        help='Path to write created dataset.')
+    parser.add_argument('--test-size', dest='test_size', type=float, default=0.1,
+                        help='Percent of data to use for testing.')
+    parser.add_argument('--validation-size', dest='validation_size', type=float, default=0.05,
+                        help='Percent of data to hold out for final validation.')
+    parser.add_argument('--note-id-field', dest='note_id_field', type=str, default='note_id',
+                        help='Specify label in jsonl file for distinguishing unique documents/notes.')
+    create_bio_dataset(**vars(parser.parse_args()))
+
+
+if __name__ == '__main__':
+    create_bio_dataset_args()
