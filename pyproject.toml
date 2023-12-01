@@ -34,4 +34,4 @@ Home = 'https://github.com/kpwhri/konsepy'
 [project.optional-dependencies]
 ssplit = ['spacy']
 sas = ['sas7bdat']
-model = ['datasets']
+model = ['datasets', 'transformers']

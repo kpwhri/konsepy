@@ -21,6 +21,7 @@ Types of changes:
 ### Added
 
 * Convert jsonl file to `datasets.DatasetDict` for processing with `transformers` library
+* Function to train a model on the `datasets.DatasetDict` using a pretrained model
 
 ## [0.0.11] - 2023-11-16
 
