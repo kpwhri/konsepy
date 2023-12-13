@@ -1,5 +1,6 @@
 import csv
 import datetime
+import itertools
 import re
 
 from loguru import logger
@@ -33,15 +34,19 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
         ):
             text = ' '.join(text.split())  # remove newlines, etc. (bad for snippets in Excel)
             for regex_ in regexes:
-                if isinstance(regex_, str):
-                    name, regex = regex_.split('==')
-                elif isinstance(regex_, tuple):
-                    name, regex = regex_
+                if isinstance(regex_, (str, tuple)):
+                    if isinstance(regex_, str):
+                        name, regex = regex_.split('==')
+                    elif isinstance(regex_, tuple):
+                        name, regex = regex_
+                    if isinstance(regex, str):
+                        regex = re.compile(regex, re.I)
+                    func = lambda x: zip(itertools.repeat(name), regex.finditer(x))
+                elif callable(regex_):
+                    func = lambda x: regex_(x, include_match=True)
                 else:
                     raise ValueError(f'Unknown how to handle regular expression of type {type(regex_)}: {regex_}')
-                if isinstance(regex, str):
-                    regex = re.compile(regex, re.I)
-                for m in regex.finditer(text):
+                for name, m in func(text):
                     precontext = text[max(m.start() - window_size, 0):m.start()]
                     postcontext = text[m.end():m.end() + window_size]
                     writer.writerow([
@@ -65,12 +70,16 @@ def get_text_snippets_for_concept_algorithm(package_name, input_files, outdir, *
                                             notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
                                             noteorder_label=None,
                                             select_probability=1.0, label='snippets', stop_after_regex_count=None,
+                                            no_regex_func=False,
                                             **kwargs):
     if concepts is None:
         concepts = list()
-    regexes = [(category, regex)
-               for concept in get_all_concepts(package_name, *concepts)
-               for regex, category, *_ in concept.regexes]
+    if no_regex_func:  # ignore negation, add functions, the RUN_REGEX_FUNC
+        regexes = [(category, regex)
+                   for concept in get_all_concepts(package_name, *concepts)
+                   for regex, category, *_ in concept.regexes]
+    else:
+        regexes = [concept.run_func for concept in get_all_concepts(package_name, *concepts)]
 
     get_text_snippets_regexes(input_files, outdir, regexes,
                               start_after=start_after,

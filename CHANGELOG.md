@@ -17,6 +17,10 @@ Types of changes:
 
 ## [Unreleased]
 
+### Changed
+
+* `get_text_snippets` when applied to existing concepts will default to use the `RUN_REGEX_FUNC` unless the `--no-regex-func` flag is supplied
+
 ## [0.0.11] - 2023-11-16
 
 ### Added

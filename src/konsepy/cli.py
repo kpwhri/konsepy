@@ -16,6 +16,8 @@ def snippet_cli():
                         help=r'REGEX_NAME==(?:re(?:gex)\sto\s(?:search|look)\sfor')
     parser.add_argument('--stop-after-regex-count', dest='stop_after_regex_count', default=None,
                         help='change to number if you want to limit number of regex "hits"; else keep None')
+    parser.add_argument('--no-regex-func', dest='no_regex_func', action='store_true', default=False,
+                        help='Run all regular expressions in `REGEXES` manaully, not calling `RUN_REGEX_FUNC`.')
     add_common_cli(parser)
     return vars(parser.parse_args())
 
