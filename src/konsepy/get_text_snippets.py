@@ -25,13 +25,13 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
     with open(outdir / f'{label}_{dt}.csv', 'w', newline='') as out:
         writer = csv.writer(out)
         writer.writerow(['id', 'studyid', 'note_id', 'date', 'regex_name', 'precontext', 'term', 'postcontext'])
-        for _, studyid, note_id, note_date, text in iterate_csv_file(
+        for i, (_, studyid, note_id, note_date, text) in enumerate(iterate_csv_file(
                 input_files, start_after=start_after, stop_after=stop_after,
                 id_label=id_label, noteid_label=noteid_label,
                 notetext_label=notetext_label, notedate_label=notedate_label,
                 noteorder_label=noteorder_label,
                 select_probability=select_probability,
-        ):
+        ), start=1):
             text = ' '.join(text.split())  # remove newlines, etc. (bad for snippets in Excel)
             for regex_ in regexes:
                 if isinstance(regex_, (str, tuple)):
@@ -62,6 +62,8 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
                     rx_count += 1
                     if stop_after_regex_count and rx_count >= stop_after_regex_count:
                         return
+            if i % 1000 == 0:
+                logger.info(f'Completed {i} records, found {rx_count} matches.')
 
 
 def get_text_snippets_for_concept_algorithm(package_name, input_files, outdir, *, concepts=None,
