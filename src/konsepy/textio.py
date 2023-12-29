@@ -10,12 +10,27 @@ from loguru import logger
 from konsepy.constants import NOTEDATE_LABEL, ID_LABEL, NOTEID_LABEL, NOTETEXT_LABEL
 
 
+class DictReaderInsensitive(csv.DictReader):
+    """
+    Overrides the csv.fieldnames property making fieldnames stripped and lowercase
+    Based on: https://stackoverflow.com/a/16937568/1165522
+    """
+
+    @property
+    def fieldnames(self):
+        return [field.strip().lower() for field in csv.DictReader.fieldnames.fget(self)]
+
+
 def iterate_csv_file(input_files, *, start_after=0, stop_after=None,
                      id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                      notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
                      noteorder_label=None,
                      select_probability=1.0, encoding='latin1'):
-    """Return count, mrn, note_id, text for each row in csv file"""
+    """
+    Return count, mrn, note_id, text for each row in csv file
+
+    count: auto-incremented for each record
+    """
     count = 0
     total_count = 0
     for input_file in input_files:
@@ -91,7 +106,7 @@ def _extract_sas_file(input_file, encoding, id_label, noteid_label,
 def _extract_csv_file(input_file, encoding, id_label, noteid_label, notedate_label,
                       notetext_label, noteorder_label=None):
     with open(input_file, encoding=encoding) as fh:
-        for row in csv.DictReader(fh):
+        for row in DictReaderInsensitive(fh):
             text = row[notetext_label]
             mrn = row[id_label]
             date = row.get(notedate_label, '')

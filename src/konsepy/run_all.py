@@ -13,7 +13,7 @@ from konsepy.textio import iterate_csv_file, output_results
 
 
 def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
-            id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
+            encoding='latin1', id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
             notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
             noteorder_label=None, incremental_output_only=False, concepts=None,
             ):
@@ -31,7 +31,7 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
     logger.info(f'Loaded {len(concepts)} concepts for processing.')
     with open(curr_outdir / 'output.jsonl', 'w') as out:
         for count, studyid, note_id, note_date, text in iterate_csv_file(
-                input_files,
+                input_files, encoding=encoding,
                 id_label=id_label, noteid_label=noteid_label,
                 notedate_label=notedate_label, notetext_label=notetext_label,
                 noteorder_label=noteorder_label,

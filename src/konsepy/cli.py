@@ -47,16 +47,18 @@ def add_outdir_and_infiles(parser: argparse.ArgumentParser = None):
                         help='Directory to place output files.')
     parser.add_argument('--input-files', nargs='+', type=str, default=list(),
                         help='Input CSV or SAS file(s) to read.')
+    parser.add_argument('--encoding', type=str, default='latin1',
+                        help='Encoding for input files. Output files will be utf8.')
     parser.add_argument('--id-label', default=ID_LABEL,
                         help='Column label for individual id')
     parser.add_argument('--noteid-label', default=NOTEID_LABEL,
                         help='Column label for note id')
     parser.add_argument('--notedate-label', default=NOTEDATE_LABEL,
-                        help='Column label for date of note')
+                        help='Column label for date of note (optional)')
     parser.add_argument('--notetext-label', default=NOTETEXT_LABEL,
                         help='Column label for note text')
     parser.add_argument('--noteorder-label', default=None,
-                        help='Specify column that enumerates the order of multiple parts of a single note.')
+                        help='Specify column that enumerates the order of multiple parts of a single note. (optional)')
     return parser
 
 

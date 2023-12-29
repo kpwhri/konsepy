@@ -12,7 +12,7 @@ from konsepy.textio import iterate_csv_file
 
 
 def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, stop_after=None, window_size=50,
-                              id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
+                              encoding='latin1', id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                               notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
                               noteorder_label=None,
                               select_probability=1.0, label='snippets', stop_after_regex_count=None, **kwargs):
@@ -26,7 +26,8 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
         writer = csv.writer(out)
         writer.writerow(['id', 'studyid', 'note_id', 'date', 'regex_name', 'precontext', 'term', 'postcontext'])
         for i, (_, studyid, note_id, note_date, text) in enumerate(iterate_csv_file(
-                input_files, start_after=start_after, stop_after=stop_after,
+                input_files, encoding=encoding,
+                start_after=start_after, stop_after=stop_after,
                 id_label=id_label, noteid_label=noteid_label,
                 notetext_label=notetext_label, notedate_label=notedate_label,
                 noteorder_label=noteorder_label,
@@ -67,6 +68,7 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
 
 
 def get_text_snippets_for_concept_algorithm(package_name, input_files, outdir, *, concepts=None,
+                                            encoding='latin1',
                                             start_after=0, stop_after=None, window_size=50,
                                             id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                                             notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
@@ -84,6 +86,7 @@ def get_text_snippets_for_concept_algorithm(package_name, input_files, outdir, *
         regexes = [concept.run_func for concept in get_all_concepts(package_name, *concepts)]
 
     get_text_snippets_regexes(input_files, outdir, regexes,
+                              encoding=encoding,
                               start_after=start_after,
                               stop_after=stop_after,
                               window_size=window_size,
