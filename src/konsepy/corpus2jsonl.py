@@ -39,7 +39,8 @@ def corpus2jsonl(input_files, outdir: Path, *,
     if split in {'sent_chunk', 'sent_window'}:
         from transformers import AutoTokenizer
         tokenizer = AutoTokenizer.from_pretrained(tokenizer)
-    dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    start_time = datetime.datetime.now()
+    dt = start_time.strftime("%Y%m%d_%H%M%S")
     if split is not None:
         name = f'corpus_{dt}.{split}.jsonl'
     else:
@@ -176,7 +177,9 @@ def corpus2jsonl(input_files, outdir: Path, *,
                 raise ValueError(f'Unrecognized option for splitting: {split}')
             if count % 10000 == 0:
                 logger.info(f'Completed {count} records ({datetime.datetime.now()})')
-    logger.info(f'DONE: Completed {count} records ({datetime.datetime.now()})')
+    end_time = datetime.datetime.now()
+    logger.info(f'DONE: Completed {count} records ({end_time})')
+    logger.info(f'DONE: Total processing time: {end_time - start_time}.')
 
 
 if __name__ == '__main__':
