@@ -20,6 +20,7 @@ Types of changes:
 ### Added
 
 * Script to convert any input corpus to jsonl files formatted for use by prodigy
+  * jsonl files can be split by sentence/sentence chunks/moving window of sentences
 * Add encoding argument for reading corpus (defaults to `latin1` as before)
 * Convert jsonl file to `datasets.DatasetDict` for processing with `transformers` library
 * Function to train a model on the `datasets.DatasetDict` using a pretrained model
