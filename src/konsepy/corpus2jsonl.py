@@ -71,7 +71,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         'note_date': note_date,
                         'sentence_id': sent_id,
                         'text': sentence,
-                    }))
+                    }) + '\n')
             elif split == 'section':
                 raise NotImplementedError
             elif split == 'sent_chunk':
@@ -91,7 +91,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                             'note_date': note_date,
                             'chunk_id': chunk_id,
                             'text': ''.join(curr),  # sentences retain their punctuation chars
-                        }))
+                        }) + '\n')
                         # reset vars
                         chunk_id += 1
                         curr = [sentence]
@@ -108,7 +108,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                                 'note_date': note_date,
                                 'chunk_id': chunk_id,
                                 'text': ''.join(curr),  # sentences retain their punctuation chars
-                            }))
+                            }) + '\n')
                             # reset vars
                             chunk_id += 1
                             curr = []
@@ -122,7 +122,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         'note_date': note_date,
                         'chunk_id': chunk_id,
                         'text': ''.join(curr),  # sentences retain their punctuation chars
-                    }))
+                    }) + '\n')
             elif split == 'sent_window':
                 target_overlap = int(max_seq_length / 4)
                 doc = nlp(text)
@@ -141,7 +141,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                             'note_date': note_date,
                             'chunk_id': chunk_id,
                             'text': ''.join(c for _, c in curr),  # sentences retain their punctuation chars
-                        }))
+                        }) + '\n')
                         # reset vars
                         chunk_id += 1
                         curr_length, curr = get_target_overlap(curr, target_overlap)
@@ -159,7 +159,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                                 'note_date': note_date,
                                 'chunk_id': chunk_id,
                                 'text': ''.join(c for _, c in curr),  # sentences retain their punctuation chars
-                            }))
+                            }) + '\n')
                             # reset vars
                             chunk_id += 1
                             curr_length, curr = get_target_overlap(curr, target_overlap)
@@ -172,7 +172,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         'note_date': note_date,
                         'chunk_id': chunk_id,
                         'text': ''.join(curr),  # sentences retain their punctuation chars
-                    }))
+                    }) + '\n')
             else:
                 raise ValueError(f'Unrecognized option for splitting: {split}')
             if count % 10000 == 0:
