@@ -21,7 +21,7 @@ def get_target_overlap(sentences: list[tuple[int, str]], max_previous):
                 return 2, []  # previous sentence is too long
             return length + 2, sentences[min(-1, -i):]
         total_length += length
-    return length + 2, sentences[-1:]  # just the last sentence
+    return total_length + 2, sentences[-1:]  # just the last sentence
 
 
 def corpus2jsonl(input_files, outdir: Path, *,
@@ -171,7 +171,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         'note_id': note_id,
                         'note_date': note_date,
                         'chunk_id': chunk_id,
-                        'text': ''.join(curr),  # sentences retain their punctuation chars
+                        'text': ''.join(c for _, c in curr),  # sentences retain their punctuation chars
                     }) + '\n')
             else:
                 raise ValueError(f'Unrecognized option for splitting: {split}')
