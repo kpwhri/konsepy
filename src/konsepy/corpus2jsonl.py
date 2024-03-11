@@ -58,18 +58,22 @@ def corpus2jsonl(input_files, outdir: Path, *,
                     'studyid': studyid,
                     'note_id': note_id,
                     'note_date': note_date,
+                    'start_index': 0,
+                    'end_index': len(text),
                     'text': text,
                 }) + '\n')
             elif split == 'sentence':
                 doc = nlp(text)
-                for sent_id, sentence in enumerate(doc.sents):
-                    sentence = str(sentence)
+                for sent_id, spacy_sentence in enumerate(doc.sents):
+                    sentence = str(spacy_sentence)
                     out.write(json.dumps({
                         'id': count,
                         'studyid': studyid,
                         'note_id': note_id,
                         'note_date': note_date,
                         'sentence_id': sent_id,
+                        'start_index': spacy_sentence.start_char,
+                        'end_index': spacy_sentence.end_char,
                         'text': sentence,
                     }) + '\n')
             elif split == 'section':
@@ -80,25 +84,32 @@ def corpus2jsonl(input_files, outdir: Path, *,
                 chunk_id = 0
                 curr = []
                 curr_length = 2  # start/end
+                start_index = 0  # approximate character index from start
+                end_index = None
                 for sent_id, spacy_sentence in enumerate(sents):
                     sentence = str(spacy_sentence)
                     length = len(tokenizer.tokenize(sentence))  # if len(sent) > max_seq_length, allow truncation
                     if length + curr_length > max_seq_length:
+                        # TODO: what if curr_length == 0 (i.e., len(sentence) > max_seq_length)?
                         out.write(json.dumps({
                             'id': count,
                             'studyid': studyid,
                             'note_id': note_id,
                             'note_date': note_date,
                             'chunk_id': chunk_id,
+                            'start_index': start_index,
+                            'end_index': end_index,
                             'text': ''.join(curr),  # sentences retain their punctuation chars
                         }) + '\n')
                         # reset vars
                         chunk_id += 1
                         curr = [sentence]
                         curr_length = 2 + length
+                        start_index = spacy_sentence.start_char
                     else:
                         curr.append(sentence)
                         curr_length += length
+                        end_index = spacy_sentence.end_char
                         if spacy_sentence[-1].is_space and spacy_sentence[-1].text.count('\n') > 1:
                             # end of a section/paragraph
                             out.write(json.dumps({
@@ -107,12 +118,15 @@ def corpus2jsonl(input_files, outdir: Path, *,
                                 'note_id': note_id,
                                 'note_date': note_date,
                                 'chunk_id': chunk_id,
+                                'start_index': start_index,
+                                'end_index': end_index,
                                 'text': ''.join(curr),  # sentences retain their punctuation chars
                             }) + '\n')
                             # reset vars
                             chunk_id += 1
                             curr = []
                             curr_length = 2
+                            start_index = spacy_sentence.end_char
                 # final fencepost
                 if curr:
                     out.write(json.dumps({
@@ -121,6 +135,8 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         'note_id': note_id,
                         'note_date': note_date,
                         'chunk_id': chunk_id,
+                        'start_index': start_index,
+                        'end_index': end_index,
                         'text': ''.join(curr),  # sentences retain their punctuation chars
                     }) + '\n')
             elif split == 'sent_window':
@@ -130,6 +146,8 @@ def corpus2jsonl(input_files, outdir: Path, *,
                 chunk_id = 0
                 curr = []  # tuple(length: int, sentence: str)
                 curr_length = 2  # start/end
+                start_index = 0
+                end_index = None
                 for sent_id, spacy_sentence in enumerate(sents):
                     sentence = str(spacy_sentence)
                     length = len(tokenizer.tokenize(sentence))  # if len(sent) > max_seq_length, allow truncation
@@ -140,6 +158,8 @@ def corpus2jsonl(input_files, outdir: Path, *,
                             'note_id': note_id,
                             'note_date': note_date,
                             'chunk_id': chunk_id,
+                            'start_index': start_index,
+                            'end_index': end_index,
                             'text': ''.join(c for _, c in curr),  # sentences retain their punctuation chars
                         }) + '\n')
                         # reset vars
@@ -147,9 +167,11 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         curr_length, curr = get_target_overlap(curr, target_overlap)
                         curr.append((length, sentence))
                         curr_length = 2 + length
+                        start_index = spacy_sentence.start_char - curr_length  # this is the next sentence - overlap
                     else:
                         curr.append((length, sentence))
                         curr_length += length
+                        end_index = spacy_sentence.end_char
                         if spacy_sentence[-1].is_space and spacy_sentence[-1].text.count('\n') > 1:
                             # end of a section/paragraph
                             out.write(json.dumps({
@@ -158,11 +180,14 @@ def corpus2jsonl(input_files, outdir: Path, *,
                                 'note_id': note_id,
                                 'note_date': note_date,
                                 'chunk_id': chunk_id,
+                                'start_index': start_index,
+                                'end_index': end_index,
                                 'text': ''.join(c for _, c in curr),  # sentences retain their punctuation chars
                             }) + '\n')
                             # reset vars
                             chunk_id += 1
                             curr_length, curr = get_target_overlap(curr, target_overlap)
+                            start_index = spacy_sentence.end_char + 1 - curr_length  # this sentence - overlap
                 # final fencepost
                 if curr:
                     out.write(json.dumps({
@@ -171,6 +196,8 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         'note_id': note_id,
                         'note_date': note_date,
                         'chunk_id': chunk_id,
+                        'start_index': start_index,
+                        'end_index': end_index,
                         'text': ''.join(c for _, c in curr),  # sentences retain their punctuation chars
                     }) + '\n')
             else:
