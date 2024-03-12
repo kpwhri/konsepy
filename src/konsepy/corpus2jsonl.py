@@ -13,15 +13,17 @@ from konsepy.textio import iterate_csv_file
 def get_target_overlap(sentences: list[tuple[int, str]], max_previous):
     """Determine how many sentences can be retained to provide additional context."""
     if len(sentences) == 1:
-        return 2, []  # if only a single sentence, don't include in next window
+        return 2, [], 0  # if only a single sentence, don't include in next window
     total_length = 0
+    total_char_length = 0
     for i, (length, sentence) in enumerate(sentences[::-1]):
         if total_length + length >= max_previous:
             if i == 0 and length > max_previous * 2:
-                return 2, []  # previous sentence is too long
-            return length + 2, sentences[min(-1, -i):]
+                return 2, [], 0  # previous sentence is too long
+            return length + 2, sentences[min(-1, -i):], total_char_length
         total_length += length
-    return total_length + 2, sentences[-1:]  # just the last sentence
+        total_char_length += len(sentence)
+    return total_length + 2, sentences[-1:], total_char_length  # just the last sentence
 
 
 def corpus2jsonl(input_files, outdir: Path, *,
@@ -106,6 +108,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         curr = [sentence]
                         curr_length = 2 + length
                         start_index = spacy_sentence.start_char
+                        end_index = spacy_sentence.end_char
                     else:
                         curr.append(sentence)
                         curr_length += length
@@ -164,10 +167,11 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         }) + '\n')
                         # reset vars
                         chunk_id += 1
-                        curr_length, curr = get_target_overlap(curr, target_overlap)
+                        curr_length, curr, char_length = get_target_overlap(curr, target_overlap)
                         curr.append((length, sentence))
                         curr_length = 2 + length
-                        start_index = spacy_sentence.start_char - curr_length  # this is the next sentence - overlap
+                        start_index = spacy_sentence.start_char - char_length  # this is the next sentence - overlap
+                        end_index = spacy_sentence.end_char
                     else:
                         curr.append((length, sentence))
                         curr_length += length
@@ -186,8 +190,8 @@ def corpus2jsonl(input_files, outdir: Path, *,
                             }) + '\n')
                             # reset vars
                             chunk_id += 1
-                            curr_length, curr = get_target_overlap(curr, target_overlap)
-                            start_index = spacy_sentence.end_char + 1 - curr_length  # this sentence - overlap
+                            curr_length, curr, char_length = get_target_overlap(curr, target_overlap)
+                            start_index = spacy_sentence.end_char + 1 - char_length  # this sentence - overlap
                 # final fencepost
                 if curr:
                     out.write(json.dumps({
