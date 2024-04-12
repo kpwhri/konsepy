@@ -17,6 +17,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.0.12] - 2023-04-12
+
 ### Added
 
 * Script to convert any input corpus to jsonl files formatted for use by prodigy
@@ -25,6 +27,7 @@ Types of changes:
 * Convert jsonl file to `datasets.DatasetDict` for processing with `transformers` library
 * Function to train a model on the `datasets.DatasetDict` using a pretrained model
 * Log progress when running `get_text_snippets` every 1000 records
+* Expand bio_tag to process at document level, sentence level, and/or jsonl corpus
 
 ### Changed
 
