@@ -4,7 +4,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from konsepy.bio_tag import get_pipeline
+from konsepy.bio_tag_sentence import get_pipeline
 from konsepy.cli import add_outdir_and_infiles
 from konsepy.constants import NOTEDATE_LABEL, ID_LABEL, NOTEID_LABEL, NOTETEXT_LABEL
 from konsepy.textio import iterate_csv_file
