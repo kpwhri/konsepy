@@ -101,7 +101,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                             'chunk_id': chunk_id,
                             'start_index': start_index,
                             'end_index': end_index,
-                            'text': ''.join(curr),  # sentences retain their punctuation chars
+                            'text': ' '.join(curr),  # sentences retain their punctuation chars, but not spaces
                         }) + '\n')
                         # reset vars
                         chunk_id += 1
@@ -123,7 +123,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                                 'chunk_id': chunk_id,
                                 'start_index': start_index,
                                 'end_index': end_index,
-                                'text': ''.join(curr),  # sentences retain their punctuation chars
+                                'text': ' '.join(curr),  # sentences retain their punctuation chars
                             }) + '\n')
                             # reset vars
                             chunk_id += 1
@@ -140,7 +140,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         'chunk_id': chunk_id,
                         'start_index': start_index,
                         'end_index': end_index,
-                        'text': ''.join(curr),  # sentences retain their punctuation chars
+                        'text': ' '.join(curr),  # sentences retain their punctuation chars
                     }) + '\n')
             elif split == 'sent_window':
                 target_overlap = int(max_seq_length / 4)
@@ -163,7 +163,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                             'chunk_id': chunk_id,
                             'start_index': start_index,
                             'end_index': end_index,
-                            'text': ''.join(c for _, c in curr),  # sentences retain their punctuation chars
+                            'text': ' '.join(c for _, c in curr),  # sentences retain their punctuation chars
                         }) + '\n')
                         # reset vars
                         chunk_id += 1
@@ -186,7 +186,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                                 'chunk_id': chunk_id,
                                 'start_index': start_index,
                                 'end_index': end_index,
-                                'text': ''.join(c for _, c in curr),  # sentences retain their punctuation chars
+                                'text': ' '.join(c for _, c in curr),  # sentences retain their punctuation chars
                             }) + '\n')
                             # reset vars
                             chunk_id += 1
@@ -202,7 +202,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         'chunk_id': chunk_id,
                         'start_index': start_index,
                         'end_index': end_index,
-                        'text': ''.join(c for _, c in curr),  # sentences retain their punctuation chars
+                        'text': ' '.join(c for _, c in curr),  # sentences retain their punctuation chars
                     }) + '\n')
             else:
                 raise ValueError(f'Unrecognized option for splitting: {split}')
