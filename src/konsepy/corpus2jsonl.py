@@ -1,5 +1,6 @@
 import datetime
 import json
+from collections import Counter
 from pathlib import Path
 
 from loguru import logger
@@ -47,6 +48,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
         name = f'corpus_{dt}.{split}.jsonl'
     else:
         name = f'corpus_{dt}.jsonl'
+    length_counter = Counter()
     with open(outdir / name, 'w', encoding='utf8') as out:
         for count, studyid, note_id, note_date, text in iterate_csv_file(
                 input_files, encoding=encoding,
@@ -110,6 +112,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         start_index = spacy_sentence.start_char
                         end_index = spacy_sentence.end_char
                     else:
+                        length_counter[length] += 1
                         curr.append(sentence)
                         curr_length += length
                         end_index = spacy_sentence.end_char
@@ -173,6 +176,7 @@ def corpus2jsonl(input_files, outdir: Path, *,
                         start_index = spacy_sentence.start_char - char_length  # this is the next sentence - overlap
                         end_index = spacy_sentence.end_char
                     else:
+                        length_counter[length] += 1
                         curr.append((length, sentence))
                         curr_length += length
                         end_index = spacy_sentence.end_char
@@ -209,6 +213,9 @@ def corpus2jsonl(input_files, outdir: Path, *,
             if count % 10000 == 0:
                 logger.info(f'Completed {count} records ({datetime.datetime.now()})')
     end_time = datetime.datetime.now()
+    if length_counter:
+        logger.info(f'Too long so truncated: {len(length_counter)}')
+        logger.info(f' * {sorted(length_counter, reverse=True)[:5]}')
     logger.info(f'DONE: Completed {count} records ({end_time})')
     logger.info(f'DONE: Total processing time: {end_time - start_time}.')
 
