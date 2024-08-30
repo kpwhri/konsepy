@@ -16,7 +16,8 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
             encoding='latin1', id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
             notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
             noteorder_label=None, incremental_output_only=False, concepts=None,
-            ):
+            **kwargs):
+    logger.info(f'Arguments ignored: {kwargs}')
     dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     curr_outdir = outdir / f'run_all_{dt}'
     curr_outdir.mkdir(parents=True)
