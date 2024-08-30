@@ -17,7 +17,13 @@ Types of changes:
 
 ## [Unreleased]
 
-## [0.0.12] - 2023-04-12
+## [0.0.13] - 2024-08-30
+
+### Fixed
+
+* Added `kwargs` to handle otherwise unknown keyword arguments.
+
+## [0.0.12] - 2024-04-12
 
 ### Added
 
