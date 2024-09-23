@@ -41,6 +41,9 @@ def iterate_csv_file(input_files, *, start_after=0, stop_after=None,
             func = _extract_csv_file
         elif input_file.endswith('jsonl'):
             func = _extract_jsonl_file
+        else:
+            logger.warning(f'Failed to read corpus file (`input_file`): {input_file}')
+            continue
         for mrn, text, note_id, date in _deline_lines(
                 func, input_file, encoding, id_label, noteid_label,
                 notedate_label, notetext_label, noteorder_label):

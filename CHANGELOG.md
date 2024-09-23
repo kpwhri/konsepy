@@ -22,6 +22,7 @@ Types of changes:
 ### Fixed
 
 * Added `kwargs` to handle otherwise unknown keyword arguments.
+* Added warning when an input corpus file is not read (previously, this would cause an obscure error)
 
 ## [0.0.12] - 2024-04-12
 
