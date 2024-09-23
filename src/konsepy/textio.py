@@ -47,7 +47,7 @@ def iterate_csv_file(input_files, *, start_after=0, stop_after=None,
         for mrn, text, note_id, date in _deline_lines(
                 func, input_file, encoding, id_label, noteid_label,
                 notedate_label, notetext_label, noteorder_label):
-            if random.random() > select_probability:
+            if select_probability < 1.0 and random.random() > select_probability:
                 continue
             total_count += 1
             if start_after >= total_count:
