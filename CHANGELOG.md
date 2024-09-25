@@ -17,6 +17,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.0.14] - 2024-09-25
+
 ### Added
 
 * Added check/warning if `include_match` not present on `RUN_REGEXES_FUNC`
