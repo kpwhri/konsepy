@@ -41,15 +41,22 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
                 logger.info(f'Completed {count} records for {len(unique_mrns)} MRNs ({datetime.datetime.now()})')
 
             for concept in concepts:
-                categories = list(concept.run_func(text))
+                categories = list(concept.run_func(text, include_match=True))
                 if categories:
+                    if concept.has_include_match:
+                        matches = [m.group() for _, m in categories]
+                        categories = [category.name for category, _ in categories]
+                    else:
+                        matches = None
+                        categories = [category.name for category in categories]
                     out.write(json.dumps({
                         'studyid': studyid,
                         'note_id': note_id,
                         'note_date': note_date,
                         'text': text if include_text_output else None,
                         'concept': concept.name,
-                        'categories': [category.name for category in categories],
+                        'matches': matches,
+                        'categories': categories,
                     }) + '\n')
                 if not incremental_output_only:
                     extract_categories(

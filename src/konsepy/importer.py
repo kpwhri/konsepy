@@ -16,7 +16,7 @@ class ConceptImport:
         self._run_func = self.imp.RUN_REGEXES_FUNC
         self.regexes = self.imp.REGEXES
 
-        self._has_include_match = self.has_param('include_match')
+        self.has_include_match = self.has_param('include_match')
 
     def has_param(self, param, default=False):
         exists = param in inspect.signature(self._run_func).parameters
@@ -25,7 +25,7 @@ class ConceptImport:
         return exists
 
     def run_func(self, text, include_match=False):
-        if include_match and self._has_include_match:
+        if include_match and self.has_include_match:
             return self._run_func(text, include_match=include_match)
         else:
             return self._run_func(text)
