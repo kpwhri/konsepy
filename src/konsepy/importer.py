@@ -1,4 +1,5 @@
 import importlib
+import inspect
 import pkgutil
 from enum import EnumMeta
 from pathlib import Path
@@ -12,11 +13,25 @@ class ConceptImport:
         self.name = module_info.name
         self.imp = importlib.import_module(f'{package_name}.concepts.{self.name}')
         self.category_enum = self._get_category()
-        self.run_func = self.imp.RUN_REGEXES_FUNC
+        self._run_func = self.imp.RUN_REGEXES_FUNC
         self.regexes = self.imp.REGEXES
 
+        self._has_include_match = self.has_param('include_match')
+
+    def has_param(self, param, default=False):
+        exists = param in inspect.signature(self._run_func).parameters
+        if not exists:
+            logger.warning(f'Concept `{self.name}` is missing `{param}={default}` in RUN_REGEXES_FUNC.')
+        return exists
+
+    def run_func(self, text, include_match=False):
+        if include_match and self._has_include_match:
+            return self._run_func(text, include_match=include_match)
+        else:
+            return self._run_func(text)
+
     def run(self, sentence):
-        self.run_func(sentence)
+        return self.run_func(sentence)
 
     @property
     def domain(self):

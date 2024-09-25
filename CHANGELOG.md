@@ -17,6 +17,14 @@ Types of changes:
 
 ## [Unreleased]
 
+### Added
+
+* Added check/warning if `include_match` not present on `RUN_REGEXES_FUNC`
+
+### Changed
+
+* Instead of dumping text into run_all's output jsonl, just output matches 
+
 ### Fixed
 
 * Skip call to `random` if probability is 1.0
