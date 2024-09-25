@@ -16,7 +16,7 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
             encoding='latin1', id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
             notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
             noteorder_label=None, incremental_output_only=False, concepts=None,
-            **kwargs):
+            include_text_output=False, **kwargs):
     logger.info(f'Arguments ignored: {kwargs}')
     dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     curr_outdir = outdir / f'run_all_{dt}'
@@ -47,7 +47,7 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
                         'studyid': studyid,
                         'note_id': note_id,
                         'note_date': note_date,
-                        'text': text,
+                        'text': text if include_text_output else None,
                         'concept': concept.name,
                         'categories': [category.name for category in categories],
                     }) + '\n')

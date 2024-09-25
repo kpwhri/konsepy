@@ -17,6 +17,12 @@ Types of changes:
 
 ## [Unreleased]
 
+### Fixed
+
+* Skip call to `random` if probability is 1.0
+* Warn when `input_file` is not read
+* Don't dump all the input text to jsonl outfile when running
+
 ## [0.0.13] - 2024-08-30
 
 ### Fixed
