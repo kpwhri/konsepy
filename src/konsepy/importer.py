@@ -24,11 +24,20 @@ class ConceptImport:
             logger.warning(f'Concept `{self.name}` is missing `{param}={default}` in RUN_REGEXES_FUNC.')
         return exists
 
-    def run_func(self, text, include_match=False):
+    def run_func(self, text, include_match=True, categories_only=False):
         if include_match and self.has_include_match:
-            return self._run_func(text, include_match=include_match)
+            res = list(self._run_func(text, include_match=include_match))
+            matches = [(m.group(), m.start(), m.end()) for _, m in res]
+            categories = [str(category) for category, _ in res]
         else:
-            return self._run_func(text)
+            if self.has_include_match:
+                categories = [str(category) for category in self._run_func(text, include_match=False)]
+            else:
+                categories = [str(category) for category in self._run_func(text)]
+            matches = None
+        if categories_only:
+            return categories
+        return categories, matches
 
     def run(self, sentence):
         return self.run_func(sentence)

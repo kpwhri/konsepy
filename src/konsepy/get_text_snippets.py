@@ -47,7 +47,7 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
                     func = lambda x: regex_(x, include_match=True)
                 else:
                     raise ValueError(f'Unknown how to handle regular expression of type {type(regex_)}: {regex_}')
-                for name, m in func(text):
+                for name, m in zip(func(text)):
                     precontext = text[max(m.start() - window_size, 0):m.start()]
                     postcontext = text[m.end():m.end() + window_size]
                     writer.writerow([

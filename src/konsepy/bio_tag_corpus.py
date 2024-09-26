@@ -58,7 +58,7 @@ def get_bio_tags_corpus(input_files, outdir: Path, *, package_name: str = None,
                         extras['chunk_id'] = data['sentence_id']
                     data['results'] = []
                     for domain, regex_func in regexes.items():
-                        for category, capture, start, end in regex_func(data['text']):
+                        for category, (capture, start, end) in zip(regex_func(data['text'])):
                             curr_data = {
                                 'index': i,
                                 'domain': domain,

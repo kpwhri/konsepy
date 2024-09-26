@@ -11,6 +11,8 @@ import csv
 import json
 from pathlib import Path
 
+from loguru import logger
+
 from konsepy.cli import add_outdir_and_infiles, concept_cli
 from konsepy.constants import NOTETEXT_LABEL, NOTEDATE_LABEL, NOTEID_LABEL, ID_LABEL
 from konsepy.importer import get_all_concepts
@@ -60,7 +62,7 @@ def get_bio_tags(input_files, outdir: Path, *, package_name: str = None, regexes
                 # 'text': text,
             }
             for domain, regex_func in regexes.items():
-                for category, capture, start, end in regex_func(text):
+                for category, (capture, start, end) in zip(regex_func(text)):
                     data = {
                         'index': i,
                         'domain': domain,

@@ -47,7 +47,7 @@ def extract_categories(mrn, note_id, text, regex_func, *, categories=None,
                        not_found_text=None, noteid_to_cat=None,
                        require_regex=None, unique_mrns=None, window_size=50):
     if categories is None:  # don't re-run when empty list
-        categories = list(regex_func(text))
+        categories = list(regex_func(text, categories_only=True))
     for category in categories:
         mrn_to_cat[mrn][category] += 1
         noteid_to_cat[(mrn, note_id)][category] += 1

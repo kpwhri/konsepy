@@ -91,7 +91,7 @@ def get_bio_tags_sentence(input_files, outdir: Path, *, package_name: str = None
                     'start': start_char,
                 }
                 for domain, regex_func in regexes.items():
-                    for category, capture, start, end in regex_func(sentence):
+                    for category, (capture, start, end) in zip(regex_func(sentence)):
                         data = {
                             'index': i,
                             'domain': domain,

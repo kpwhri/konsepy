@@ -134,7 +134,7 @@ def _extract_jsonl_file(input_file, encoding, id_label, noteid_label, notedate_l
 def output_results(outdir, *, not_found_text=None,
                    note_counter=None, cat_counter_mrns=None,
                    category_enums=None, note_to_cat=None, mrn_to_cat=None):
-    categories = [e for category_enum in category_enums for e in category_enum]
+    categories = [str(e) for category_enum in category_enums for e in category_enum]
     if not_found_text is not None:
         with open(outdir / 'snippets.csv', 'w', newline='') as out:
             writer = csv.writer(out)
