@@ -17,6 +17,13 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.0.15] - 2024-09-26
+
+### Fixed
+
+* Speed up processing by not re-running function on text when no concepts were found (empty list is False)
+* Fixed issues around Enums being output as the variables in generated CSV files. 
+
 ## [0.0.14] - 2024-09-25
 
 ### Added
@@ -101,7 +108,8 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/0.0.14...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/0.0.15...HEAD
+[0.0.14]: https://github.com/kpwhri/konsepy/compare/0.0.14...0.0.15
 [0.0.14]: https://github.com/kpwhri/konsepy/compare/0.0.13...0.0.14
 [0.0.13]: https://github.com/kpwhri/konsepy/compare/0.0.12...0.0.13
 [0.0.12]: https://github.com/kpwhri/konsepy/compare/0.0.11...0.0.12
