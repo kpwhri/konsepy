@@ -35,3 +35,4 @@ Home = 'https://github.com/kpwhri/konsepy'
 ssplit = ['spacy']
 sas = ['sas7bdat']
 model = ['datasets', 'transformers']
+all = ['konsepy[sas,model]']

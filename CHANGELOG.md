@@ -22,6 +22,7 @@ Types of changes:
 
 * Added `--metadata-labels` to be able to supply metadata to the run function. Uses
   `--metadata-labels source_col==dest_variable[==type[==format]]`.
+* Added organisation to requirements/pyproject files.
 
 ### Changed
 
