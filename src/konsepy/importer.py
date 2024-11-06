@@ -15,25 +15,28 @@ class ConceptImport:
         self.category_enum = self._get_category()
         self._run_func = self.imp.RUN_REGEXES_FUNC
         self.regexes = self.imp.REGEXES
+        self._params = inspect.signature(self._run_func).parameters
 
         self.has_include_match = self.has_param('include_match')
 
     def has_param(self, param, default=False):
-        exists = param in inspect.signature(self._run_func).parameters
+        exists = param in self._params
         if not exists:
             logger.warning(f'Concept `{self.name}` is missing `{param}={default}` in RUN_REGEXES_FUNC.')
         return exists
 
-    def run_func(self, text, include_match=True, categories_only=False):
+    def run_func(self, text, include_match=True, categories_only=False, **metadata):
+        # ensure requested metadata in calling function
+        metadata = {k: v for k, v in metadata.items() if k in self._params}
         if include_match and self.has_include_match:
-            res = list(self._run_func(text, include_match=include_match))
+            res = list(self._run_func(text, include_match=include_match, **metadata))
             matches = [(m.group(), m.start(), m.end()) for _, m in res]
             categories = [str(category) for category, _ in res]
         else:
             if self.has_include_match:
-                categories = [str(category) for category in self._run_func(text, include_match=False)]
+                categories = [str(category) for category in self._run_func(text, include_match=False, **metadata)]
             else:
-                categories = [str(category) for category in self._run_func(text)]
+                categories = [str(category) for category in self._run_func(text, **metadata)]
             matches = None
         if categories_only:
             return categories

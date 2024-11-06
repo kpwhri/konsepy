@@ -12,7 +12,8 @@ def run_regex_on_files(input_files, regex_func, *, start_after=0, stop_after=Non
                        require_regex=None, window_size=50,
                        id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                        notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
-                       noteorder_label=None, select_probability=1.0, **kwargs):
+                       noteorder_label=None, metadata_labels=None,
+                       select_probability=1.0, **kwargs):
     count = 0  # default value; received from forloop below
     cat_counter_notes = Counter()
     cat_counter_mrns = defaultdict(set)
@@ -22,11 +23,12 @@ def run_regex_on_files(input_files, regex_func, *, start_after=0, stop_after=Non
     not_found_text = Counter()
     if require_regex:
         require_regex = re.compile(require_regex, re.I)
-    for count, mrn, note_id, note_date, text in iterate_csv_file(
+    for count, mrn, note_id, note_date, text, metadata in iterate_csv_file(
             input_files, start_after=start_after, stop_after=stop_after,
             id_label=id_label, noteid_label=noteid_label,
             notedate_label=notedate_label, notetext_label=notetext_label,
-            noteorder_label=noteorder_label, select_probability=select_probability,
+            noteorder_label=noteorder_label, metadata_labels=metadata_labels,
+            select_probability=select_probability,
     ):
         if count % 10000 == 0:
             logger.info(

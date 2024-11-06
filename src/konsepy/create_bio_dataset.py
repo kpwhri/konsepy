@@ -3,6 +3,7 @@ import datetime
 import json
 from pathlib import Path
 from datasets import Dataset, Sequence
+from konsepy.cli import clean_args
 from loguru import logger
 
 
@@ -109,7 +110,7 @@ def create_bio_dataset_args():
                         help='Percent of data to hold out for final validation.')
     parser.add_argument('--note-id-field', dest='note_id_field', type=str, default='note_id',
                         help='Specify label in jsonl file for distinguishing unique documents/notes.')
-    create_bio_dataset(**vars(parser.parse_args()))
+    create_bio_dataset(**clean_args(vars(parser.parse_args())))
 
 
 if __name__ == '__main__':

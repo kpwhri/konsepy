@@ -24,7 +24,7 @@ class DictReaderInsensitive(csv.DictReader):
 def iterate_csv_file(input_files, *, start_after=0, stop_after=None,
                      id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                      notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
-                     noteorder_label=None,
+                     noteorder_label=None, metadata_labels=None,
                      select_probability=1.0, encoding='latin1'):
     """
     Return count, mrn, note_id, text for each row in csv file
@@ -44,40 +44,42 @@ def iterate_csv_file(input_files, *, start_after=0, stop_after=None,
         else:
             logger.warning(f'Failed to read corpus file (`input_file`): {input_file}')
             continue
-        for mrn, text, note_id, date in _deline_lines(
+        for mrn, text, note_id, date, md in _deline_lines(
                 func, input_file, encoding, id_label, noteid_label,
-                notedate_label, notetext_label, noteorder_label):
+                notedate_label, notetext_label, noteorder_label,
+                metadata_labels):
             if select_probability < 1.0 and random.random() > select_probability:
                 continue
             total_count += 1
             if start_after >= total_count:
                 continue
             count += 1
-            yield count, mrn, note_id, date, text
+            yield count, mrn, note_id, date, text, md
             if stop_after and count > stop_after:
                 return
 
 
 def _deline_lines(func, input_file, encoding, mrn_label, noteid_label,
-                  notedate_label, notetext_label, noteorder_label=None):
+                  notedate_label, notetext_label, noteorder_label=None,
+                  metadata_labels=None):
     # variables for delining notes
     curr_id = None
     curr_mrn = None
     curr_date = None
     curr_doc = []
-    for mrn, text, note_id, date, order in func(
+    for mrn, text, note_id, date, order, md in func(
             input_file, encoding, mrn_label, noteid_label, notedate_label,
-            notetext_label, noteorder_label
+            notetext_label, noteorder_label, metadata_labels,
     ):
         if not order:  # skip delining
-            yield mrn, text, note_id, date
+            yield mrn, text, note_id, date, md
         else:
             if curr_id is None:
                 curr_id = note_id
                 curr_mrn = mrn
                 curr_date = date
             elif note_id != curr_id:
-                yield curr_mrn, ' '.join(text for _, _, text in sorted(curr_doc)), curr_id, curr_date
+                yield curr_mrn, ' '.join(text for _, _, text in sorted(curr_doc)), curr_id, curr_date, md
                 curr_id = note_id
                 curr_mrn = mrn
                 curr_date = date
@@ -86,11 +88,12 @@ def _deline_lines(func, input_file, encoding, mrn_label, noteid_label,
                 continue  # skip empty text
             curr_doc.append((note_id, order, text))  # keep track of all text associated with this note
     if curr_id is not None:
-        yield curr_mrn, ' '.join(text for _, _, text in sorted(curr_doc)), curr_id, curr_date
+        yield curr_mrn, ' '.join(text for _, _, text in sorted(curr_doc)), curr_id, curr_date, md
 
 
 def _extract_sas_file(input_file, encoding, id_label, noteid_label,
-                      notedate_label, notetext_label, noteorder_label=None):
+                      notedate_label, notetext_label, noteorder_label=None,
+                      metadata_labels=None):
     from sas7bdat import SAS7BDAT
     with SAS7BDAT(input_file, skip_header=False, encoding=encoding) as fh:
         header = []
@@ -103,11 +106,15 @@ def _extract_sas_file(input_file, encoding, id_label, noteid_label,
             noteid = row[header.index(noteid_label)]
             text = row[header.index(notetext_label)]
             order = row[header.index(noteorder_label)] if noteorder_label and noteorder_label in header else None
-            yield mrn, text, noteid, date, order
+            metadata = {}
+            if metadata_labels:
+                for src, (dest, func) in metadata_labels.items():
+                    metadata[dest] = func(row[header.index(src)])
+            yield mrn, text, noteid, date, order, metadata
 
 
 def _extract_csv_file(input_file, encoding, id_label, noteid_label, notedate_label,
-                      notetext_label, noteorder_label=None):
+                      notetext_label, noteorder_label=None, metadata_labels=None):
     with open(input_file, encoding=encoding) as fh:
         for row in DictReaderInsensitive(fh):
             text = row[notetext_label]
@@ -115,11 +122,15 @@ def _extract_csv_file(input_file, encoding, id_label, noteid_label, notedate_lab
             date = row.get(notedate_label, '')
             note_id = row[noteid_label]
             order = row.get(noteorder_label, '')
-            yield mrn, text, note_id, date, order
+            metadata = {}
+            if metadata_labels:
+                for src, (dest, func) in metadata_labels.items():
+                    metadata[dest] = func(row[src])
+            yield mrn, text, note_id, date, order, metadata
 
 
 def _extract_jsonl_file(input_file, encoding, id_label, noteid_label, notedate_label,
-                        notetext_label, noteorder_label=None):
+                        notetext_label, noteorder_label=None, metadata_labels=None):
     with open(input_file, encoding=encoding) as fh:
         for line in fh:
             data = json.loads(line.strip())
@@ -128,7 +139,11 @@ def _extract_jsonl_file(input_file, encoding, id_label, noteid_label, notedate_l
             date = data.get(notedate_label, '')
             note_id = data[noteid_label]
             order = data.get(noteorder_label, '')
-            yield mrn, text, note_id, date, order
+            metadata = {}
+            if metadata_labels:
+                for src, (dest, func) in metadata_labels.items():
+                    metadata[dest] = func(data[src])
+            yield mrn, text, note_id, date, order, metadata
 
 
 def output_results(outdir, *, not_found_text=None,

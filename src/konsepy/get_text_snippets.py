@@ -14,7 +14,7 @@ from konsepy.textio import iterate_csv_file
 def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, stop_after=None, window_size=50,
                               encoding='latin1', id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                               notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
-                              noteorder_label=None,
+                              noteorder_label=None, metadata_labels=None,
                               select_probability=1.0, label='snippets', stop_after_regex_count=None, **kwargs):
     dt = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     logger.warning('Snippets will have spaces normalized:'
@@ -25,12 +25,12 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
     with open(outdir / f'{label}_{dt}.csv', 'w', newline='') as out:
         writer = csv.writer(out)
         writer.writerow(['id', 'studyid', 'note_id', 'date', 'regex_name', 'precontext', 'term', 'postcontext'])
-        for i, (_, studyid, note_id, note_date, text) in enumerate(iterate_csv_file(
+        for i, (_, studyid, note_id, note_date, text, metadata) in enumerate(iterate_csv_file(
                 input_files, encoding=encoding,
                 start_after=start_after, stop_after=stop_after,
                 id_label=id_label, noteid_label=noteid_label,
                 notetext_label=notetext_label, notedate_label=notedate_label,
-                noteorder_label=noteorder_label,
+                noteorder_label=noteorder_label, metadata_labels=metadata_labels,
                 select_probability=select_probability,
         ), start=1):
             text = ' '.join(text.split())  # remove newlines, etc. (bad for snippets in Excel)
@@ -44,7 +44,7 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
                         regex = re.compile(regex, re.I)
                     func = lambda x: zip(itertools.repeat(name), regex.finditer(x))
                 elif callable(regex_):
-                    func = lambda x: regex_(x, include_match=True)
+                    func = lambda x: regex_(x, include_match=True, **metadata)
                 else:
                     raise ValueError(f'Unknown how to handle regular expression of type {type(regex_)}: {regex_}')
                 for name, m in zip(func(text)):

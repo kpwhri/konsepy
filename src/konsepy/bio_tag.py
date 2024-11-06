@@ -29,7 +29,7 @@ def build_regex_dict(package_name):
 def get_bio_tags(input_files, outdir: Path, *, package_name: str = None, regexes: RegexDict = None,
                  id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                  notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
-                 noteorder_label=None, **kwargs):
+                 noteorder_label=None, metadata_labels=None, **kwargs):
     """
 
     """
@@ -49,9 +49,9 @@ def get_bio_tags(input_files, outdir: Path, *, package_name: str = None, regexes
         )
         writer.writeheader()
         i = 0
-        for count, studyid, note_id, note_date, text in iterate_csv_file(
+        for count, studyid, note_id, note_date, text, metadata in iterate_csv_file(
                 input_files, id_label=id_label, noteid_label=noteid_label, notedate_label=notedate_label,
-                notetext_label=notetext_label, noteorder_label=noteorder_label,
+                notetext_label=notetext_label, noteorder_label=noteorder_label, metadata_labels=metadata_labels,
         ):
             constant_meta = {
                 'studyid': studyid,

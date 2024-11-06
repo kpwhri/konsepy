@@ -16,7 +16,6 @@ from pathlib import Path
 from konsepy.cli import add_outdir_and_infiles, concept_cli
 from konsepy.constants import NOTETEXT_LABEL, NOTEDATE_LABEL, NOTEID_LABEL, ID_LABEL
 from konsepy.importer import get_all_concepts
-from konsepy.textio import iterate_csv_file
 from konsepy.types import RegexDict
 
 

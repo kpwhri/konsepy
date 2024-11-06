@@ -47,7 +47,7 @@ def get_bio_tags_sentence(input_files, outdir: Path, *, package_name: str = None
                           sentence_model='senter',
                           id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                           notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
-                          noteorder_label=None):
+                          noteorder_label=None, metadata_labels=None):
     """
 
     """
@@ -71,10 +71,10 @@ def get_bio_tags_sentence(input_files, outdir: Path, *, package_name: str = None
         )
         writer.writeheader()
         i = 0
-        for doc, (count, studyid, note_id, note_date) in nlp.pipe(format_for_spacy(
+        for doc, (count, studyid, note_id, note_date, metadata) in nlp.pipe(format_for_spacy(
                 iterate_csv_file(
                     input_files, id_label=id_label, noteid_label=noteid_label, notedate_label=notedate_label,
-                    notetext_label=notetext_label, noteorder_label=noteorder_label,
+                    notetext_label=notetext_label, noteorder_label=noteorder_label, metadata_labels=metadata_labels,
                 )
         ), as_tuples=True):
             constant_meta = {

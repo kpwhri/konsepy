@@ -1,4 +1,5 @@
 import argparse
+import datetime
 from pathlib import Path
 
 from konsepy.constants import NOTETEXT_LABEL, NOTEDATE_LABEL, NOTEID_LABEL, ID_LABEL
@@ -7,7 +8,7 @@ from konsepy.constants import NOTETEXT_LABEL, NOTEDATE_LABEL, NOTEID_LABEL, ID_L
 def concept_cli(func):
     parser = argparse.ArgumentParser(fromfile_prefix_chars='@!')
     add_common_cli(parser)
-    func(**vars(parser.parse_args()))
+    func(**clean_args(vars(parser.parse_args())))
 
 
 def snippet_cli():
@@ -19,7 +20,7 @@ def snippet_cli():
     parser.add_argument('--no-regex-func', dest='no_regex_func', action='store_true', default=False,
                         help='Run all regular expressions in `REGEXES` manaully, not calling `RUN_REGEX_FUNC`.')
     add_common_cli(parser)
-    return vars(parser.parse_args())
+    return clean_args(vars(parser.parse_args()))
 
 
 def add_common_cli(parser: argparse.ArgumentParser):
@@ -46,7 +47,7 @@ def add_outdir_and_infiles(parser: argparse.ArgumentParser = None):
     parser.add_argument('--outdir', type=Path, default=Path('.'),
                         help='Directory to place output files.')
     parser.add_argument('--input-files', nargs='+', type=str, default=list(),
-                        help='Input CSV or SAS file(s) to read.')
+                        help='Input CSV, JSONL, or SAS file(s) to read.')
     parser.add_argument('--encoding', type=str, default='latin1',
                         help='Encoding for input files. Output files will be utf8.')
     parser.add_argument('--id-label', default=ID_LABEL,
@@ -59,6 +60,8 @@ def add_outdir_and_infiles(parser: argparse.ArgumentParser = None):
                         help='Column label for note text')
     parser.add_argument('--noteorder-label', default=None,
                         help='Specify column that enumerates the order of multiple parts of a single note. (optional)')
+    parser.add_argument('--metadata-labels', default=None, nargs='*',
+                        help='Specify additional column metadata as kwarg_name==in_dataset_name')
     return parser
 
 
@@ -69,3 +72,38 @@ def add_run_all_args(parser: argparse.ArgumentParser = None):
                         help='Do not retain summarized output, just output incremental jsonl file.')
     parser.add_argument('--concepts', nargs='+', default=False,
                         help='Look for these particular concepts.')
+
+
+def _get_casting_func(target, format_=None):
+    match target:
+        case 'dt':
+            if format_:
+                return lambda x: datetime.datetime.strptime(x, format_)
+            else:
+                raise ValueError(f'Parsing datetime requires format string e.g., {target}==%m/%d/%y.'
+                                 f' For info on formatting,'
+                                 f' see https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior')
+        case 'int':
+            return lambda x: int(x)
+        case 'float':
+            return lambda x: float(x)
+        case 'str':
+            return lambda x: str(x)
+    raise ValueError(f'Unrecognized cast request: {target}=={format_}')
+
+
+def clean_args(args: dict):
+    """Fix/format arguments, e.g., `metadata-labels`"""
+    if 'metadata_labels' in args:
+        result = {}
+        for md_labels in args['metadata_labels']:
+            src, dest, *other = md_labels.split('==')
+            func = _get_casting_func(*other) if other else None
+            result[src] = (dest, func)
+        args['metadata_labels'] = result
+    return args
+
+
+def parse_and_clean_args(parser: argparse.ArgumentParser) -> dict:
+    """Wrapper to parse an clean arguments."""
+    return clean_args(vars(parser.parse_args()))
