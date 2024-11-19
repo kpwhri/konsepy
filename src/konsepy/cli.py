@@ -94,7 +94,7 @@ def _get_casting_func(target, format_=None):
 
 def clean_args(args: dict):
     """Fix/format arguments, e.g., `metadata-labels`"""
-    if 'metadata_labels' in args:
+    if args.get('metadata_labels', None):
         result = {}
         for md_labels in args['metadata_labels']:
             src, dest, *other = md_labels.split('==')
