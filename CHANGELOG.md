@@ -18,6 +18,9 @@ Types of changes:
 
 ## [Unreleased]
 
+
+## [0.1.0] - 2024-11-06
+
 ### Added
 
 * Added `--metadata-labels` to be able to supply metadata to the run function. Uses
