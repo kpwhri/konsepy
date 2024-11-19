@@ -211,12 +211,12 @@ def corpus2jsonl(input_files, outdir: Path, *,
             else:
                 raise ValueError(f'Unrecognized option for splitting: {split}')
             if count % 50000 == 0:
-                logger.info(f'Completed {count} records ({datetime.datetime.now()})')
+                logger.info(f'Completed {count:,} records ({datetime.datetime.now()})')
     end_time = datetime.datetime.now()
     if length_counter:
         logger.info(f'Too long so truncated: {len(length_counter)}')
         logger.info(f' * {sorted(length_counter, reverse=True)[:5]}')
-    logger.info(f'DONE: Completed {count} records ({end_time})')
+    logger.info(f'DONE: Completed {count:,} records ({end_time})')
     logger.info(f'DONE: Total processing time: {end_time - start_time}.')
 
 

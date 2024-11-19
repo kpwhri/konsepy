@@ -32,7 +32,8 @@ def run_regex_on_files(input_files, regex_func, *, start_after=0, stop_after=Non
     ):
         if count % 50000 == 0:
             logger.info(
-                f'Completed {count} records: {len(unique_mrns)} MRNs contain any category ({datetime.datetime.now()})')
+                f'Completed {count:,} records:'
+                f' {len(unique_mrns):,} MRNs contain any category ({datetime.datetime.now()})')
         extract_categories(
             mrn, note_id, text, regex_func,
             cat_counter_mrns=cat_counter_mrns, cat_counter_notes=cat_counter_notes,
@@ -40,7 +41,7 @@ def run_regex_on_files(input_files, regex_func, *, start_after=0, stop_after=Non
             not_found_text=not_found_text, noteid_to_cat=noteid_to_cat,
             unique_mrns=unique_mrns, window_size=window_size
         )
-    logger.info(f'Finished. Total records: {count}  ({datetime.datetime.now()})')
+    logger.info(f'Finished. Total records: {count:,}  ({datetime.datetime.now()})')
     return cat_counter_notes, cat_counter_mrns, not_found_text, mrn_to_cat, noteid_to_cat
 
 

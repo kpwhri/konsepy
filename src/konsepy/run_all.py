@@ -42,8 +42,8 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
                 noteorder_label=noteorder_label, metadata_labels=metadata_labels,
         ):
             if count % 50000 == 0:
-                logger.info(f'Completed {count} records:'
-                            f' {len(unique_mrns)} MRNs contain any category ({datetime.datetime.now()})')
+                logger.info(f'Completed {count:,} records:'
+                            f' {len(unique_mrns):,} MRNs contain any category ({datetime.datetime.now()})')
 
             for concept in concepts:
                 categories, matches = concept.run_func(text, include_match=True, **metadata)
@@ -64,7 +64,7 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
                         mrn_to_cat=mrn_to_cat, noteid_to_cat=noteid_to_cat,
                         unique_mrns=unique_mrns
                     )
-    logger.info(f'Finished. Total records: {count}  ({datetime.datetime.now()})')
+    logger.info(f'Finished. Total records: {count:,}  ({datetime.datetime.now()})')
     if not incremental_output_only:
         logger.info(f'Bulk writing to {curr_outdir}.')
         output_results(curr_outdir, note_counter=cat_counter_notes,
