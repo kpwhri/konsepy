@@ -115,7 +115,7 @@ def _extract_sas_file(input_file, encoding, id_label, noteid_label,
 
 def _extract_csv_file(input_file, encoding, id_label, noteid_label, notedate_label,
                       notetext_label, noteorder_label=None, metadata_labels=None):
-    with open(input_file, encoding=encoding) as fh:
+    with open(input_file, newline='', encoding=encoding) as fh:
         for row in DictReaderInsensitive(fh):
             text = row[notetext_label]
             mrn = row[id_label]
