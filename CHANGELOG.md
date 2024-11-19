@@ -18,6 +18,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.1.1] - 2024-11-19
+
 ### Changed
 
 * Have `run_all.py` and `get_text_snippets.py` return the path to the created file/directory
@@ -126,7 +128,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/0.1.0...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/0.1.1...HEAD
+
+[0.1.1]: https://github.com/kpwhri/konsepy/compare/0.1.0...0.1.1
 
 [0.1.0]: https://github.com/kpwhri/konsepy/compare/0.0.15...0.1.0
 
