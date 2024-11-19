@@ -41,7 +41,7 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
                 notedate_label=notedate_label, notetext_label=notetext_label,
                 noteorder_label=noteorder_label, metadata_labels=metadata_labels,
         ):
-            if count % 10000 == 0:
+            if count % 50000 == 0:
                 logger.info(f'Completed {count} records:'
                             f' {len(unique_mrns)} MRNs contain any category ({datetime.datetime.now()})')
 

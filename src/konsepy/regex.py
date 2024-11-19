@@ -30,7 +30,7 @@ def run_regex_on_files(input_files, regex_func, *, start_after=0, stop_after=Non
             noteorder_label=noteorder_label, metadata_labels=metadata_labels,
             select_probability=select_probability,
     ):
-        if count % 10000 == 0:
+        if count % 50000 == 0:
             logger.info(
                 f'Completed {count} records: {len(unique_mrns)} MRNs contain any category ({datetime.datetime.now()})')
         extract_categories(
