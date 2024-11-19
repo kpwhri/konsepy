@@ -18,6 +18,9 @@ Types of changes:
 
 ## [Unreleased]
 
+### Changed
+
+* Have `run_all.py` and `get_text_snippets.py` return the path to the created file/directory
 
 ## [0.1.0] - 2024-11-06
 

@@ -22,7 +22,8 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
                    ' to a single space in the output.')
     rx_count = 0
     outdir.mkdir(exist_ok=True)
-    with open(outdir / f'{label}_{dt}.csv', 'w', newline='') as out:
+    outfile = outdir / f'{label}_{dt}.csv'
+    with open(outfile, 'w', newline='') as out:
         writer = csv.writer(out)
         writer.writerow(['id', 'studyid', 'note_id', 'date', 'regex_name', 'precontext', 'term', 'postcontext'])
         for i, (_, studyid, note_id, note_date, text, metadata) in enumerate(iterate_csv_file(
@@ -65,6 +66,7 @@ def get_text_snippets_regexes(input_files, outdir, regexes, *, start_after=0, st
                         return
             if i % 1000 == 0:
                 logger.info(f'Completed {i} records, found {rx_count} matches.')
+    return outfile
 
 
 def get_text_snippets_for_concept_algorithm(package_name, input_files, outdir, *, concepts=None,
@@ -85,20 +87,20 @@ def get_text_snippets_for_concept_algorithm(package_name, input_files, outdir, *
     else:
         regexes = [concept.run_func for concept in get_all_concepts(package_name, *concepts)]
 
-    get_text_snippets_regexes(input_files, outdir, regexes,
-                              encoding=encoding,
-                              start_after=start_after,
-                              stop_after=stop_after,
-                              window_size=window_size,
-                              select_probability=select_probability,
-                              id_label=id_label,
-                              noteid_label=noteid_label,
-                              notedate_label=notedate_label,
-                              notetext_label=notetext_label,
-                              noteorder_label=noteorder_label,
-                              label=label,
-                              stop_after_regex_count=stop_after_regex_count,
-                              )
+    return get_text_snippets_regexes(input_files, outdir, regexes,
+                                     encoding=encoding,
+                                     start_after=start_after,
+                                     stop_after=stop_after,
+                                     window_size=window_size,
+                                     select_probability=select_probability,
+                                     id_label=id_label,
+                                     noteid_label=noteid_label,
+                                     notedate_label=notedate_label,
+                                     notetext_label=notetext_label,
+                                     noteorder_label=noteorder_label,
+                                     label=label,
+                                     stop_after_regex_count=stop_after_regex_count,
+                                     )
 
 
 def get_text_snippets_cli(package_name=None):
@@ -106,9 +108,9 @@ def get_text_snippets_cli(package_name=None):
     kwargs['package_name'] = kwargs.get('package_name', package_name) or package_name
 
     if package_name and kwargs.get('regexes', None) is None:
-        get_text_snippets_for_concept_algorithm(**kwargs)
+        return get_text_snippets_for_concept_algorithm(**kwargs)
     else:
-        get_text_snippets_regexes(**kwargs)
+        return get_text_snippets_regexes(**kwargs)
 
 
 if __name__ == '__main__':

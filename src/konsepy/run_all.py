@@ -16,7 +16,11 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
             encoding='latin1', id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
             notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
             noteorder_label=None, metadata_labels=None, incremental_output_only=False,
-            concepts=None, include_text_output=False, **kwargs):
+            concepts=None, include_text_output=False, **kwargs) -> pathlib.Path:
+    """
+    Run all concepts.
+    Return: Newly created `run_all` directory.
+    """
     logger.info(f'Arguments ignored: {kwargs}')
     dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     curr_outdir = outdir / f'run_all_{dt}'
@@ -61,10 +65,12 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
                     )
     logger.info(f'Finished. Total records: {count}  ({datetime.datetime.now()})')
     if not incremental_output_only:
+        logger.info(f'Bulk writing to {curr_outdir}.')
         output_results(curr_outdir, note_counter=cat_counter_notes,
                        cat_counter_mrns=cat_counter_mrns,
                        category_enums=[c.category_enum for c in concepts],
                        note_to_cat=noteid_to_cat, mrn_to_cat=mrn_to_cat)
+    return curr_outdir
 
 
 if __name__ == '__main__':
