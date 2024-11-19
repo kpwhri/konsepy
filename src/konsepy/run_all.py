@@ -42,7 +42,8 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
                 noteorder_label=noteorder_label, metadata_labels=metadata_labels,
         ):
             if count % 10000 == 0:
-                logger.info(f'Completed {count} records for {len(unique_mrns)} MRNs ({datetime.datetime.now()})')
+                logger.info(f'Completed {count} records:'
+                            f' {len(unique_mrns)} MRNs contain any category ({datetime.datetime.now()})')
 
             for concept in concepts:
                 categories, matches = concept.run_func(text, include_match=True, **metadata)

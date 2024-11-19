@@ -174,4 +174,4 @@ def output_results(outdir, *, not_found_text=None,
         writer.writeheader()
         for (mrn, note), note_counter in note_to_cat.items():
             writer.writerow({'mrn': mrn, 'note_id': note} | dict(note_counter))
-    logger.info(f'Unique MRNs: {len(mrn_to_cat)}')
+    logger.info(f'Unique MRNs with any category: {len(mrn_to_cat)}')
