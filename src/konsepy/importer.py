@@ -12,7 +12,7 @@ class ConceptImport:
     def __init__(self, module_info, package_name):
         self.name = module_info.name
         self.imp = importlib.import_module(f'{package_name}.concepts.{self.name}')
-        self.category_enum = self._get_category()
+        self.category_enums = list(self._get_categories())
         self._run_func = self.imp.RUN_REGEXES_FUNC
         self.regexes = self.imp.REGEXES
         self._params = inspect.signature(self._run_func).parameters
@@ -51,13 +51,17 @@ class ConceptImport:
 
     @property
     def categories(self):
-        return [category.name for category in self.category_enum]
+        return [category.name for category_enum in self.category_enums for category in category_enum]
 
-    def _get_category(self):
+    def _get_categories(self):
+        categories = []
         for name, value in self.imp.__dict__.items():
             if isinstance(value, EnumMeta):
-                return value
-        raise ValueError(f'Unable to identify category enum for concept "{self.name}".')
+                categories.append(value)
+        if categories:
+            return categories
+        else:
+            raise ValueError(f'Unable to identify category enum for concept "{self.name}".')
 
     def __str__(self):
         return f'ConceptImport<{self.name}>'

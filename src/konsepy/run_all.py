@@ -69,7 +69,7 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
         logger.info(f'Bulk writing to {curr_outdir}.')
         output_results(curr_outdir, note_counter=cat_counter_notes,
                        cat_counter_mrns=cat_counter_mrns,
-                       category_enums=[c.category_enum for c in concepts],
+                       category_enums=[category_enum for c in concepts for category_enum in c.category_enums],
                        note_to_cat=noteid_to_cat, mrn_to_cat=mrn_to_cat)
     return curr_outdir
 

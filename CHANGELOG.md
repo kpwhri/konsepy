@@ -18,6 +18,10 @@ Types of changes:
 
 ## [Unreleased]
 
+### Changed
+
+* Allow a single algorithm (i.e., concept) to have more than one category. 
+
 ## [0.1.1] - 2024-11-19
 
 ### Changed

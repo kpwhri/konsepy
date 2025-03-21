@@ -90,7 +90,7 @@ def run_regex_and_output(package_name, input_files, outdir, *concepts,
             **kwargs
         )
         output_results(curr_outdir, not_found_text=not_found_text, note_counter=note_counter,
-                       cat_counter_mrns=cat_counter_mrns, category_enums=[iconcept.category_enum],
+                       cat_counter_mrns=cat_counter_mrns, category_enums=iconcept.category_enums,
                        note_to_cat=note_to_cat, mrn_to_cat=mrn_to_cat)
 
 
