@@ -47,7 +47,7 @@ def get_bio_tags_sentence(input_files, outdir: Path, *, package_name: str = None
                           sentence_model='senter',
                           id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                           notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
-                          noteorder_label=None, metadata_labels=None):
+                          noteorder_label=None, metadata_labels=None, limit_noteids=None):
     """
 
     """
@@ -77,6 +77,8 @@ def get_bio_tags_sentence(input_files, outdir: Path, *, package_name: str = None
                     notetext_label=notetext_label, noteorder_label=noteorder_label, metadata_labels=metadata_labels,
                 )
         ), as_tuples=True):
+            if limit_noteids and note_id not in limit_noteids:
+                continue
             constant_meta = {
                 'studyid': studyid,
                 'note_id': note_id,

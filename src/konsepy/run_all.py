@@ -16,7 +16,7 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
             encoding='latin1', id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
             notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
             noteorder_label=None, metadata_labels=None, incremental_output_only=False,
-            concepts=None, include_text_output=False, **kwargs) -> pathlib.Path:
+            concepts=None, include_text_output=False, limit_noteids=None, **kwargs) -> pathlib.Path:
     """
     Run all concepts.
     Return: Newly created `run_all` directory.
@@ -41,6 +41,8 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
                 notedate_label=notedate_label, notetext_label=notetext_label,
                 noteorder_label=noteorder_label, metadata_labels=metadata_labels,
         ):
+            if limit_noteids and note_id not in limit_noteids:
+                continue
             if count % 50000 == 0:
                 logger.info(f'Completed {count:,} records:'
                             f' {len(unique_mrns):,} MRNs contain any category ({datetime.datetime.now()})')

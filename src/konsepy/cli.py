@@ -62,6 +62,8 @@ def add_outdir_and_infiles(parser: argparse.ArgumentParser = None):
                         help='Specify column that enumerates the order of multiple parts of a single note. (optional)')
     parser.add_argument('--metadata-labels', default=None, nargs='*',
                         help='Specify additional column metadata as kwarg_name==in_dataset_name')
+    parser.add_argument('--limit-noteids', default=None, nargs='+',
+                        help='Limit run to only this noteid (useful for debugging).')
     return parser
 
 
