@@ -18,6 +18,10 @@ Types of changes:
 
 ## [Unreleased]
 
+### Added
+
+* Code and tests for context checks including pattern checks, negation, and other subject.
+
 ### Changed
 
 * Allow a single algorithm (i.e., concept) to have more than one category. 
