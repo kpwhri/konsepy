@@ -22,6 +22,7 @@ Types of changes:
 
 * Code and tests for context checks including pattern checks, negation, and other subject.
 * `run4snippets` function to extract snippets for running `textual_review_app` program along with tests
+* Added restricting `run4snippets` to particular categories and/or concepts along with tests
 
 ### Changed
 

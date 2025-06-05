@@ -10,8 +10,18 @@ from konsepy.importer import get_all_concepts
 from konsepy.textio import iterate_csv_file
 
 
+def _retain_record(concept, category, target_categories, target_concepts):
+    if not target_concepts and not target_categories:
+        return True
+    if target_categories and category in target_categories:
+        return True
+    if target_concepts and concept.name in target_concepts:
+        return True
+    return False
+
 def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
                  context_length=180, max_window=500,
+                 target_categories=None, target_concepts=None,
                  encoding='utf8', id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                  notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
                  noteorder_label=None, metadata_labels=None,
@@ -20,12 +30,16 @@ def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
     Run all concepts.
     Return: Newly created `run_all` directory.
     """
+    target_categories = set(target_categories) if target_categories else set()
+    target_concepts = set(target_concepts) if target_concepts else set()
+
     logger.info(f'Arguments ignored: {kwargs}')
     dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     curr_outdir = outdir / f'run_all_{dt}'
     curr_outdir.mkdir(parents=True)
     logger.add(curr_outdir / f'run_all_{dt}.log')
     count = 0  # default value; received from forloop below
+    output_length = 0
     unique_mrns = set()
     concepts = list(get_all_concepts(package_name, *(concepts or list())))
     logger.info(f'Loaded {len(concepts)} concepts for processing.')
@@ -45,22 +59,27 @@ def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
             for concept in concepts:
                 categories, matches = concept.run_func(text, include_match=True, **metadata)
                 for m, category in zip(matches, categories):
-                    out.write(json.dumps({
-                        # keep order: first three will display in textual_review_app
-                        'note_id': note_id,
-                        'concept': concept.name,
-                        'category': category,
-                        'studyid': studyid,
-                        'note_date': note_date,
-                        'match': m.group(),
-                        'start_index': m.start(),
-                        'end_index': m.end(),
-                        'precontext': text[max(m.start() - context_length, 0): m.start()],
-                        'postcontext': text[m.end(): m.end() + context_length],
-                        'pretext': text[max(m.start() - max_window, 0): m.start()],  # TODO: configure how much to show
-                        'posttext': text[m.end(): m.end() + max_window],  # TODO: configure how much to show
-                    }) + '\n')
+                    if _retain_record(concept, category, target_categories, target_concepts):
+                        output_length += 1
+                        out.write(json.dumps({
+                            # keep order: first three will display in textual_review_app
+                            'note_id': note_id,
+                            'concept': concept.name,
+                            'category': category,
+                            'studyid': studyid,
+                            'note_date': note_date,
+                            'match': m.group(),
+                            'start_index': m.start(),
+                            'end_index': m.end(),
+                            'precontext': text[max(m.start() - context_length, 0): m.start()],
+                            'postcontext': text[m.end(): m.end() + context_length],
+                            'pretext': text[max(m.start() - max_window, 0): m.start()],  # TODO: configure how much to show
+                            'posttext': text[m.end(): m.end() + max_window],  # TODO: configure how much to show
+                        }) + '\n')
 
+    target_concepts_str = ', '.join(target_concepts) if target_concepts else 'all'
+    target_categories_str = ', '.join(target_categories) if target_categories else 'all'
+    logger.info(f'Output {output_length:,} rows belonging to concepts: {target_concepts_str}; and categories: {target_categories_str}.')
     logger.info(f'Finished. Total records: {count:,}  ({datetime.datetime.now()})')
     return curr_outdir
 
@@ -75,4 +94,10 @@ if __name__ == '__main__':
                         help='Default context window to show around match.')
     parser.add_argument('--max-window', 'max_window', type=int, default=500,
                         help='Maximum context window that will be output and available for review.')
+    parser.add_argument('--target-concepts', 'target_concepts', nargs='+',
+                        help='Target concepts (exclude others) of form `jealousy`.'
+                             ' Treated as "or" when combined with `--target-categories`.')
+    parser.add_argument('--target-categories', 'target_categories', nargs='+',
+                        help='Target categories (exclude others) of form `Jealous.YES`.'
+                             ' Treated as "or" when combined with `--target-concepts`.')
     run4snippets(**clean_args(vars(parser.parse_args())))

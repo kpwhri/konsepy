@@ -1,11 +1,27 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from konsepy.run4snippets import run4snippets
 
 
-def test_run4snippets(tmp_path, request, caplog):
-    input_file = Path(request.fspath).parent / 'data' / 'corpus.jsonl'
+@pytest.fixture
+def input_file(request):
+    return Path(request.fspath).parent / 'data' / 'corpus.jsonl'
+
+
+def iter_jsonl_output(outdir: Path):
+    exp_keys = {'note_id', 'concept', 'category', 'studyid', 'note_date', 'match', 'start_index',
+                'end_index', 'precontext', 'postcontext', 'pretext', 'posttext'}
+    with open(outdir / 'output.jsonl', encoding='utf8') as fh:
+        for line in fh:
+            data = json.loads(line)
+            assert set(data.keys()) == exp_keys
+            yield data
+
+
+def test_run4snippets(tmp_path, input_file, caplog):
     outdir = run4snippets(
         [input_file],
         outdir=tmp_path,
@@ -17,12 +33,78 @@ def test_run4snippets(tmp_path, request, caplog):
     loglines = caplog.text.split('\n')
     assert 'Arguments ignored: {}' in loglines[0]
     assert 'Loaded 3 concepts for processing' in loglines[1]
-    assert 'Total records: 117' in loglines[2]
+    assert 'Output 713 rows' in loglines[2]
+    assert 'Total records: 117' in loglines[3]
 
     # test jsonlines output
-    exp_keys = {'note_id', 'concept', 'category', 'studyid', 'note_date', 'match', 'start_index',
-                'end_index', 'precontext', 'postcontext', 'pretext', 'posttext'}
-    with open(outdir / 'output.jsonl', encoding='utf8') as fh:
-        for line in fh:
-            data = json.loads(line)
-            assert set(data.keys()) == exp_keys
+    for data in iter_jsonl_output(outdir):
+        pass
+
+
+def test_run4snippets_only_categories(tmp_path, input_file, caplog):
+    target_categories = ['Jealous.NO', 'Revenge.NO', 'Justice.NO']
+    outdir = run4snippets(
+        [input_file],
+        outdir=tmp_path,
+        package_name='example_nlp',
+        id_label='chapter',
+        noteid_label='chapter',
+        target_categories=target_categories,
+    )
+    # test log results
+    loglines = caplog.text.split('\n')
+    assert 'Arguments ignored: {}' in loglines[0]
+    assert 'Loaded 3 concepts for processing' in loglines[1]
+    assert 'Output 4 rows' in loglines[2]
+    assert 'Total records: 117' in loglines[3]
+
+    # test jsonlines output
+    for data in iter_jsonl_output(outdir):
+        assert data['category'] in target_categories
+
+
+def test_run4snippets_only_concepts(tmp_path, input_file, caplog):
+    target_concepts = ['justice']
+    outdir = run4snippets(
+        [input_file],
+        outdir=tmp_path,
+        package_name='example_nlp',
+        id_label='chapter',
+        noteid_label='chapter',
+        target_concepts=target_concepts,
+    )
+    # test log results
+    loglines = caplog.text.split('\n')
+    assert 'Arguments ignored: {}' in loglines[0]
+    assert 'Loaded 3 concepts for processing' in loglines[1]
+    assert 'Output 536 rows' in loglines[2]
+    assert 'Total records: 117' in loglines[3]
+
+    # test jsonlines output
+    for data in iter_jsonl_output(outdir):
+        assert data['concept'] in target_concepts
+
+
+def test_run4snippets_only_concepts_and_categories(tmp_path, input_file, caplog):
+    target_concepts = ['revenge']
+    target_categories = ['Jealous.FAMILY']
+
+    outdir = run4snippets(
+        [input_file],
+        outdir=tmp_path,
+        package_name='example_nlp',
+        id_label='chapter',
+        noteid_label='chapter',
+        target_concepts=target_concepts,
+        target_categories=target_categories,
+    )
+    # test log results
+    loglines = caplog.text.split('\n')
+    assert 'Arguments ignored: {}' in loglines[0]
+    assert 'Loaded 3 concepts for processing' in loglines[1]
+    assert 'Output 135 rows' in loglines[2]
+    assert 'Total records: 117' in loglines[3]
+
+    # test jsonlines output
+    for data in iter_jsonl_output(outdir):
+        assert data['concept'] in target_concepts or data['category'] in target_categories
