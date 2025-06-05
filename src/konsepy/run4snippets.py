@@ -100,23 +100,30 @@ def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
     return curr_outdir
 
 
-if __name__ == '__main__':
+def main(package_name=None):
     import argparse
 
     parser = argparse.ArgumentParser(fromfile_prefix_chars='@!')
     add_outdir_and_infiles(parser)
     add_run_all_args(parser)
-    parser.add_argument('--context-length', 'context_length', type=int, default=180,
+    parser.add_argument('--context-length', dest='context_length', type=int, default=180,
                         help='Default context window to show around match.')
-    parser.add_argument('--max-window', 'max_window', type=int, default=500,
+    parser.add_argument('--max-window', dest='max_window', type=int, default=500,
                         help='Maximum context window that will be output and available for review.')
-    parser.add_argument('--target-concepts', 'target_concepts', nargs='+',
+    parser.add_argument('--target-concepts', dest='target_concepts', nargs='+',
                         help='Target concepts (exclude others) of form `jealousy`.'
                              ' Treated as "or" when combined with `--target-categories`.')
-    parser.add_argument('--target-categories', 'target_categories', nargs='+',
+    parser.add_argument('--target-categories', dest='target_categories', nargs='+',
                         help='Target categories (exclude others) of form `Jealous.YES`.'
                              ' Treated as "or" when combined with `--target-concepts`.')
-    parser.add_argument('--order-metadata', 'order_metadata', nargs='+',
+    parser.add_argument('--order-metadata', dest='order_metadata', nargs='+',
                         help='Specify the first metadata items to appear in jsonlines output.'
                              ' E.g., textual_review_app will display on the first 3 metadata items.')
-    run4snippets(**clean_args(vars(parser.parse_args())))
+    if package_name:
+        run4snippets(package_name=package_name, **clean_args(vars(parser.parse_args())))
+    else:
+        run4snippets(**clean_args(vars(parser.parse_args())))
+
+
+if __name__ == '__main__':
+    main()
