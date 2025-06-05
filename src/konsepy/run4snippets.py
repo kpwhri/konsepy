@@ -47,7 +47,6 @@ def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
     logger.add(curr_outdir / f'run_all_{dt}.log')
     count = 0  # default value; received from forloop below
     output_length = 0
-    unique_mrns = set()
     concepts = list(get_all_concepts(package_name, *(concepts or list())))
     logger.info(f'Loaded {len(concepts)} concepts for processing.')
     all_keys = [
@@ -67,7 +66,7 @@ def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
                 continue
             if count % 50_000 == 0:
                 logger.info(f'Completed {count:,} records:'
-                            f' {len(unique_mrns):,} MRNs contain any category ({datetime.datetime.now()})')
+                            f' Found {len(output_length):,} concepts so far ({datetime.datetime.now()})')
 
             for concept in concepts:
                 categories, matches = concept.run_func(text, include_match=True, **metadata)
