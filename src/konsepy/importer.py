@@ -30,7 +30,8 @@ class ConceptImport:
         metadata = {k: v for k, v in metadata.items() if k in self._params}
         if include_match and self.has_include_match:
             res = list(self._run_func(text, include_match=include_match, **metadata))
-            matches = [(m.group(), m.start(), m.end()) for _, m in res]
+            # matches = [(m.group(), m.start(), m.end()) for _, m in res]
+            matches = [m for _, m in res]  # return match directly
             categories = [str(category) for category, _ in res]
         else:
             if self.has_include_match:

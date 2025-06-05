@@ -53,19 +53,20 @@ def is_not_other_subject(m, precontext, postcontext, **kwargs):
     return False
 
 
-def check_if_other_subject(m, precontext, postcontext, text, window=30, banned_characters='.', **kwargs):
+def check_if_other_subject(m, precontext, postcontext, text, window=30, banned_characters='.',
+                           other_concept=True, **kwargs):
     if m2 := has_other_subject(precontext, direction=-1, banned_characters=banned_characters):
         if is_not_other_subject(**get_contexts(
                 m2, text, context_match=m, context_window=window, context_direction=-1,
         )):
             pass  # might still be in post-context
         else:
-            return m2
+            return m2 if other_concept is True else other_concept
     if m2 := has_other_subject(postcontext, direction=1, banned_characters=banned_characters):
         if is_not_other_subject(**get_contexts(
                 m2, text, context_match=m, context_window=window, context_direction=1,
         )):
-            pass  # might still be in post-context
+            pass
         else:
-            return m2
+            return m2 if other_concept is True else other_concept
     return None

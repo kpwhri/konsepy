@@ -4,6 +4,7 @@ Simplify reading input files by creating an iterating wrapper.
 import csv
 import json
 import random
+from pathlib import Path
 
 from loguru import logger
 
@@ -35,15 +36,20 @@ def iterate_csv_file(input_files, *, start_after=0, stop_after=None,
     total_count = 0
     for input_file in input_files:
         func = None
-        if input_file.endswith('sas7bdat'):
-            func = _extract_sas_file
-        elif input_file.endswith(('csv', 'tsv')):
-            func = _extract_csv_file
-        elif input_file.endswith('jsonl'):
-            func = _extract_jsonl_file
-        else:
-            logger.warning(f'Failed to read corpus file (`input_file`): {input_file}')
-            continue
+        if not isinstance(input_file, Path):
+            input_file = Path(input_file)
+        match input_file.suffix:
+            case '.sas7bdat':
+                func = _extract_sas_file
+            case '.csv':
+                func = _extract_csv_file
+            case '.tsv':
+                func = _extract_csv_file
+            case '.jsonl':
+                func = _extract_jsonl_file
+            case _:
+                logger.warning(f'Failed to read corpus file (`input_file`): {input_file}')
+                continue
         for mrn, text, note_id, date, md in _deline_lines(
                 func, input_file, encoding, id_label, noteid_label,
                 notedate_label, notetext_label, noteorder_label,

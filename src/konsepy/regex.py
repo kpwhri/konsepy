@@ -3,6 +3,7 @@ import re
 from collections import Counter, defaultdict
 
 from konsepy.constants import NOTEDATE_LABEL, ID_LABEL, NOTEID_LABEL, NOTETEXT_LABEL
+from konsepy.context.contexts import get_contexts
 from konsepy.importer import get_all_concepts
 from konsepy.textio import iterate_csv_file, output_results
 from loguru import logger
@@ -140,5 +141,37 @@ def search_all_regex_match_func(regexes):
                     yield res
                 else:
                     yield category
+
+    return _search_all_regex
+
+
+def search_and_replace_regex_func(regexes, window=30):
+    """Search, but replace found text to prevent double-matching"""
+
+    def _search_all_regex(text, include_match=False):
+        for regex, category, *other in regexes:
+            funcs = None
+            if len(other) > 0:
+                funcs = other[0]
+            text_pieces = []
+            prev_end = 0
+            for m in regex.finditer(text):
+                found = None
+                if funcs:
+                    for func in funcs:  # parse function in order
+                        if res := func(**get_contexts(m, text, window)):
+                            found = (res, m) if include_match else res
+                            break
+                if found:
+                    if found is True or (include_match and found[0] is True):
+                        continue  # no result
+                    yield found
+                else:
+                    yield (category, m) if include_match else category
+                text_pieces.append(text[prev_end:m.start()])
+                text_pieces.append(f" {(len(m.group()) - 2) * '.'} ")
+                prev_end = m.end()
+            text_pieces.append(text[prev_end:])
+            text = ''.join(text_pieces)
 
     return _search_all_regex
