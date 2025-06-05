@@ -11,9 +11,10 @@ def input_file(request):
     return Path(request.fspath).parent / 'data' / 'corpus.jsonl'
 
 
-def iter_jsonl_output(outdir: Path):
+def iter_jsonl_output(outdir: Path, extra_keys=None):
+    extra_keys = set(extra_keys) if extra_keys else set()
     exp_keys = {'note_id', 'concept', 'category', 'studyid', 'note_date', 'match', 'start_index',
-                'end_index', 'precontext', 'postcontext', 'pretext', 'posttext'}
+                'end_index', 'precontext', 'postcontext', 'pretext', 'posttext'} | extra_keys
     with open(outdir / 'output.jsonl', encoding='utf8') as fh:
         for line in fh:
             data = json.loads(line)
@@ -39,6 +40,32 @@ def test_run4snippets(tmp_path, input_file, caplog):
     # test jsonlines output
     for data in iter_jsonl_output(outdir):
         pass
+
+
+def test_run4snippets_with_metadata(tmp_path, input_file, caplog):
+    metadata = ['chapter', 'title']
+    outdir = run4snippets(
+        [input_file],
+        outdir=tmp_path,
+        package_name='example_nlp',
+        id_label='chapter',
+        noteid_label='chapter',
+        order_metadata=metadata,
+        metadata_labels=metadata,
+    )
+    # test log results
+    loglines = caplog.text.split('\n')
+    assert 'Arguments ignored: {}' in loglines[0]
+    assert 'Loaded 3 concepts for processing' in loglines[1]
+    assert 'Output 713 rows' in loglines[2]
+    assert 'Total records: 117' in loglines[3]
+
+    # test jsonlines output
+    for data in iter_jsonl_output(outdir, extra_keys=set(metadata)):
+        assert metadata[0] in data.keys()  # confirm presence
+        assert metadata[0] == list(data.keys())[0]  # ensure this is in the correct order
+        assert metadata[1] in data.keys()  # confirm presence
+        assert metadata[1] == list(data.keys())[1]  # ensure this is in the correct order
 
 
 def test_run4snippets_only_categories(tmp_path, input_file, caplog):

@@ -94,15 +94,24 @@ def _get_casting_func(target, format_=None):
     raise ValueError(f'Unrecognized cast request: {target}=={format_}')
 
 
+def clean_metadata_labels(metadata_labels):
+    result = {}
+    for md_labels in metadata_labels:
+        if '==' in md_labels:
+            src, dest, *other = md_labels.split('==')
+        else:
+            src = md_labels
+            dest = md_labels
+            other = None
+        func = _get_casting_func(*other) if other else lambda x: x
+        result[src] = (dest, func)
+    return result
+
+
 def clean_args(args: dict):
     """Fix/format arguments, e.g., `metadata-labels`"""
     if args.get('metadata_labels', None):
-        result = {}
-        for md_labels in args['metadata_labels']:
-            src, dest, *other = md_labels.split('==')
-            func = _get_casting_func(*other) if other else None
-            result[src] = (dest, func)
-        args['metadata_labels'] = result
+        args['metadata_labels'] = clean_metadata_labels(args['metadata_labels'])
     return args
 
 
