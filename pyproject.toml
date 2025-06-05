@@ -12,6 +12,7 @@ readme = 'README.md'
 dependencies = [
     'loguru',
     'pytest',
+    'pytest-loguru',
 ]
 requires-python = '>=3.10'
 keywords = [
