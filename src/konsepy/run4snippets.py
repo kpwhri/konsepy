@@ -66,7 +66,7 @@ def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
                 continue
             if count % 50_000 == 0:
                 logger.info(f'Completed {count:,} records:'
-                            f' Found {len(output_length):,} concepts so far ({datetime.datetime.now()})')
+                            f' Found {output_length:,} concepts so far ({datetime.datetime.now()})')
 
             for concept in concepts:
                 categories, matches = concept.run_func(text, include_match=True, **metadata)
