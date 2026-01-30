@@ -7,7 +7,7 @@ import re
 
 from konsepy.context.negation import check_if_negated
 from konsepy.context.other_subject import check_if_other_subject
-from konsepy.regex import search_and_replace_regex_func
+from konsepy.rxsearch import search_and_replace_regex_func
 
 
 class Jealousy(enum.Enum):  # TODO: change 'Concept' to relevant concept name

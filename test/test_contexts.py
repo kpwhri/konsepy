@@ -14,10 +14,9 @@ def test_check_if_pattern_after(saiga_antelope, pattern, pattern2, window, banne
     if m := re.search(pattern, saiga_antelope, re.I):
         res = check_if_pattern_after(regex, m, saiga_antelope, window=window,
                                      banned_characters=banned_characters, end=end)
+        res = list(res)
         if res:
-            assert res.group() == exp
-        else:
-            assert res is None
+            assert res[0].group() == exp
 
 
 @pytest.mark.parametrize('pattern, pattern2, window, banned_characters, end, exp', [
@@ -29,7 +28,6 @@ def test_check_if_pattern_before(saiga_antelope, pattern, pattern2, window, bann
     if m := re.search(pattern, saiga_antelope, re.I):
         res = check_if_pattern_after(regex, m, saiga_antelope, window=window,
                                      banned_characters=banned_characters, end=end)
+        res = list(res)
         if res:
-            assert res.group() == exp
-        else:
-            assert res is None
+            assert res[0].group() == exp

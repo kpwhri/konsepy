@@ -1,3 +1,4 @@
+from konsepy.context.negation import is_not_negated
 
 # konsepy
 
@@ -29,9 +30,62 @@ my_nlp_package/
 ```
 
 Each concept file (e.g., `my_concept.py`) must define:
-* `REGEXES`: A list of regex-category pairs.
+* `REGEXES`: A list of regex-category pairs (and optional context functions).
 * `RUN_REGEXES_FUNC`: A function that executes the regexes and returns categories/matches.
 * `CategoryEnum`: An `Enum` defining the possible categories for the concept.
+
+#### Search Functions
+
+`konsepy` provides several pre-built search functions in `konsepy.rxsearch`:
+
+**Some simple ones:**
+- `search_all_regex`: Finds all occurrences of each regex in the list.
+- `search_first_regex`: Finds only the first occurrence of each regex.
+
+**Probably the most useful:**
+- `search_and_replace_regex_func`: Prevents double-matching by replacing found text with dots before proceeding to the next regex.
+- `search_all_regex_func`: Supports "sentinel" values (None) to stop processing if a match was found earlier.
+
+Example of `my_concept.py`:
+```python
+import re
+from enum import Enum
+from konsepy.rxsearch import search_all_regex
+from konsepy.context.negation import check_if_negated
+from konsepy.context.other_subject import check_if_other_subject
+
+
+class CategoryEnum(Enum):
+  MENTION = 1
+  NO = 0
+  OTHER = 3
+
+
+REGEXES = [
+  (re.compile(r'my pattern', re.I),
+   CategoryEnum.MENTION,
+   [
+     lambda **kwargs: check_if_negated(neg_concept=CategoryEnum.NO, **kwargs),
+     lambda **kwargs: check_if_other_subject(other_concept=CategoryEnum.OTHER, **kwargs),
+   ]
+   ),
+]
+
+RUN_REGEXES_FUNC = search_all_regex(REGEXES)
+```
+
+#### Custom Search Functions
+
+You can create your own search function by defining a function that returns a generator:
+
+```python
+def my_custom_search(regexes):
+    def _search(text, include_match=False):
+        for regex, category, *other in regexes:
+            for m in regex.finditer(text):
+                yield (category, m) if include_match else category
+    return _search
+```
 
 ### Running konsepy
 
