@@ -1,6 +1,6 @@
 [project]
 name = 'konsepy'
-version = '0.2.1'
+version = '0.2.2'
 description = 'Framework for build NLP information extraction systems using regular expressions.'
 authors = [
     { name = 'dcronkite', email = 'dcronkite+pypi@gmail.com' },
@@ -28,6 +28,24 @@ classifiers = [# https://pypi.org/classifiers/
 
 [project.urls]
 Home = 'https://github.com/kpwhri/konsepy'
+
+[project.optional-dependencies]
+dev = [
+    'pytest>=9.0.0',
+]
+ssplit = [
+    'spacy'
+]
+sas = [
+    'sas7bdat'
+]
+model = [
+    'datasets',
+    'transformers',
+]
+all = [
+    'konsepy[sas,model]'
+]
 
 [dependency-groups]
 dev = [
