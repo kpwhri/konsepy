@@ -1,5 +1,3 @@
-from konsepy.context.negation import is_not_negated
-
 # konsepy
 
 Framework for build NLP information extraction systems using regular expressions. `konsepy` then enables leveraging the NLP system to create a silver standard for fine-tuning a transformer model. 

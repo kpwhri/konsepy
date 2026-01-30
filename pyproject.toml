@@ -1,6 +1,6 @@
 [project]
 name = 'konsepy'
-version = '0.3.0'
+version = '0.3.1'
 description = 'Framework for build NLP information extraction systems using regular expressions.'
 authors = [
     { name = 'dcronkite', email = 'dcronkite+pypi@gmail.com' },
@@ -42,9 +42,6 @@ sas = [
 model = [
     'datasets',
     'transformers',
-]
-all = [
-    'konsepy[sas,model]'
 ]
 
 [dependency-groups]
