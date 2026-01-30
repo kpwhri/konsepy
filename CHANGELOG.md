@@ -18,6 +18,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-01-30
+
 ### Added
 
 * Added `word_window` parameter to `get_contexts` and related functions to allow retrieving context based on word count.
@@ -168,7 +170,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.2.3...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.3.0...HEAD
+
+[0.3.0]: https://github.com/kpwhri/konsepy/compare/v0.2.3...v0.3.0
 
 [0.2.3]: https://github.com/kpwhri/konsepy/compare/v0.2.0...v0.2.3
 
