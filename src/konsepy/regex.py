@@ -25,15 +25,6 @@ def run_regex_on_files(input_files, regex_func, package_name=None, *, start_afte
     not_found_text = Counter()
     if require_regex:
         require_regex = re.compile(require_regex, re.I)
-
-    # Note: ProcessingEngine expects a package_name and concepts.
-    # Here regex_func is passed directly. We might need a slightly different approach
-    # if we want to use ProcessingEngine for generic regex_func.
-    # For now, I'll keep the original loop in run_regex_on_files to avoid over-complicating
-    # if it doesn't fit the "Concept" model perfectly, OR I adapt ProcessingEngine.
-    
-    # Actually, ProcessingEngine is designed for Concepts.
-    # run_regex_on_files is used by run_regex_and_output which iterates over concepts.
     
     for count, mrn, note_id, note_date, text, metadata in iterate_csv_file(
             input_files, start_after=start_after, stop_after=stop_after,
@@ -199,5 +190,80 @@ def search_and_replace_regex_func(regexes, window=30):
                 prev_end = m.end()
             text_pieces.append(text[prev_end:])
             text = ''.join(text_pieces)
+
+    return _search_all_regex
+
+
+def search_first_regex_func(regexes):
+    def _search_first_regex(text, include_match=False):
+        for regex, category, *other in regexes:
+            funcs = None
+            if len(other) > 0:
+                if isinstance(other[0], list):
+                    funcs = other[0]
+                else:
+                    funcs = [other[0]]
+
+            for m in regex.finditer(text):
+                if funcs:
+                    for func in funcs:
+                        for res in func(m, text):
+                            if res:
+                                yield (res, m) if include_match else res
+                                return
+                else:
+                    yield (category, m) if include_match else category
+                    return
+
+    return _search_first_regex
+
+
+def search_all_regex_func(regexes):
+    """For each regex, return all, but run 3rd argument if a function (use finditer)"""
+
+    def _search_all_regex(text, include_match=False, ignore_indices=False):
+        """
+        ignore_indices: set to True for testing (so that the locating index doesn't need to be run)
+        """
+        found_non_unknown = False
+        for regex, category, *other in regexes:
+            if regex is None:
+                if found_non_unknown:
+                    # setting regex to None acts as sentinel value: continue only if only UNKNOWNs were found
+                    break
+                else:
+                    continue
+
+            funcs = None
+            if len(other) > 0:  # functions to post-process
+                if isinstance(other[0], list):
+                    funcs = other[0]
+                else:
+                    funcs = [other[0]]
+            if len(other) > 1 and not ignore_indices:  # function to locate starting text
+                indices = list(other[1](text))
+            else:
+                indices = [(0, len(text))]
+
+            for start, end in indices:
+                for m in regex.finditer(text, pos=start, endpos=end):
+                    if funcs:
+                        found_any = False
+                        found = False
+                        for func in funcs:
+                            for res in func(m, text):
+                                if res:
+                                    yield (res, m) if include_match else res
+                                    found = True
+                                    found_any = True
+                                    if res.name != 'UNKNOWN':
+                                        found_non_unknown = True
+                                    break
+                            if found:
+                                break
+                        if not found_any and category is not None:
+                            yield (category, m) if include_match else category
+                    elif category is not None:
+                        yield (category, m) if include_match else category
 
     return _search_all_regex

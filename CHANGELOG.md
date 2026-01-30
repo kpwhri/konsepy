@@ -18,6 +18,17 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-01-29
+
+### Added
+
+* Regex patterns
+* Context functions
+
+### Changed
+
+* Context functions now yield so that they can be used by, e.g., `search_all_regex_func`.
+
 ## [0.2.0] - 2026-01-29
 
 ### Added
@@ -146,7 +157,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.2.0...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.2.3...HEAD
+
+[0.2.3]: https://github.com/kpwhri/konsepy/compare/v0.2.0...v0.2.3
 
 [0.2.0]: https://github.com/kpwhri/konsepy/compare/0.1.1...v0.2.0
 
