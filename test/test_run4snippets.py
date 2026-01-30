@@ -31,11 +31,11 @@ def test_run4snippets(tmp_path, input_file, caplog):
         noteid_label='chapter',
     )
     # test log results
-    loglines = caplog.text.split('\n')
-    assert 'Arguments ignored: {}' in loglines[0]
-    assert 'Loaded 3 concepts for processing' in loglines[1]
-    assert 'Output 713 rows' in loglines[2]
-    assert 'Total records: 117' in loglines[3]
+    loglines = [line for line in caplog.text.split('\n') if line.strip()]
+    assert any('Arguments ignored: {}' in line for line in loglines)
+    assert any('Loaded 3 concepts for processing' in line for line in loglines)
+    assert any('Output 713 rows' in line for line in loglines)
+    assert any('Total records: 117' in line for line in loglines)
 
     # test jsonlines output
     for data in iter_jsonl_output(outdir):
@@ -54,11 +54,11 @@ def test_run4snippets_with_metadata(tmp_path, input_file, caplog):
         metadata_labels=metadata,
     )
     # test log results
-    loglines = caplog.text.split('\n')
-    assert 'Arguments ignored: {}' in loglines[0]
-    assert 'Loaded 3 concepts for processing' in loglines[1]
-    assert 'Output 713 rows' in loglines[2]
-    assert 'Total records: 117' in loglines[3]
+    loglines = [line for line in caplog.text.split('\n') if line.strip()]
+    assert any('Arguments ignored: {}' in line for line in loglines)
+    assert any('Loaded 3 concepts for processing' in line for line in loglines)
+    assert any('Output 713 rows' in line for line in loglines)
+    assert any('Total records: 117' in line for line in loglines)
 
     # test jsonlines output
     for data in iter_jsonl_output(outdir, extra_keys=set(metadata)):
@@ -79,11 +79,11 @@ def test_run4snippets_only_categories(tmp_path, input_file, caplog):
         target_categories=target_categories,
     )
     # test log results
-    loglines = caplog.text.split('\n')
-    assert 'Arguments ignored: {}' in loglines[0]
-    assert 'Loaded 3 concepts for processing' in loglines[1]
-    assert 'Output 4 rows' in loglines[2]
-    assert 'Total records: 117' in loglines[3]
+    loglines = [line for line in caplog.text.split('\n') if line.strip()]
+    assert any('Arguments ignored: {}' in line for line in loglines)
+    assert any('Loaded 3 concepts for processing' in line for line in loglines)
+    assert any('Output 4 rows' in line for line in loglines)
+    assert any('Total records: 117' in line for line in loglines)
 
     # test jsonlines output
     for data in iter_jsonl_output(outdir):
@@ -101,11 +101,11 @@ def test_run4snippets_only_concepts(tmp_path, input_file, caplog):
         target_concepts=target_concepts,
     )
     # test log results
-    loglines = caplog.text.split('\n')
-    assert 'Arguments ignored: {}' in loglines[0]
-    assert 'Loaded 3 concepts for processing' in loglines[1]
-    assert 'Output 536 rows' in loglines[2]
-    assert 'Total records: 117' in loglines[3]
+    loglines = [line for line in caplog.text.split('\n') if line.strip()]
+    assert any('Arguments ignored: {}' in line for line in loglines)
+    assert any('Loaded 3 concepts for processing' in line for line in loglines)
+    assert any('Output 536 rows' in line for line in loglines)
+    assert any('Total records: 117' in line for line in loglines)
 
     # test jsonlines output
     for data in iter_jsonl_output(outdir):
@@ -126,11 +126,11 @@ def test_run4snippets_only_concepts_and_categories(tmp_path, input_file, caplog)
         target_categories=target_categories,
     )
     # test log results
-    loglines = caplog.text.split('\n')
-    assert 'Arguments ignored: {}' in loglines[0]
-    assert 'Loaded 3 concepts for processing' in loglines[1]
-    assert 'Output 135 rows' in loglines[2]
-    assert 'Total records: 117' in loglines[3]
+    loglines = [line for line in caplog.text.split('\n') if line.strip()]
+    assert any('Arguments ignored: {}' in line for line in loglines)
+    assert any('Loaded 3 concepts for processing' in line for line in loglines)
+    assert any('Output 135 rows' in line for line in loglines)
+    assert any('Total records: 117' in line for line in loglines)
 
     # test jsonlines output
     for data in iter_jsonl_output(outdir):

@@ -11,7 +11,10 @@ import csv
 import json
 from pathlib import Path
 
-import spacy
+try:
+    import spacy
+except ImportError:
+    spacy = None
 
 from konsepy.cli import add_outdir_and_infiles
 from konsepy.constants import NOTETEXT_LABEL, NOTEDATE_LABEL, NOTEID_LABEL, ID_LABEL
@@ -93,18 +96,20 @@ def get_bio_tags_sentence(input_files, outdir: Path, *, package_name: str = None
                     'start': start_char,
                 }
                 for domain, regex_func in regexes.items():
-                    for category, (capture, start, end) in zip(regex_func(sentence)):
-                        data = {
-                            'index': i,
-                            'domain': domain,
-                            'category': category,
-                            'capture': capture,
-                            'start': start,
-                            'end': end,
-                        }
-                        writer.writerow(data | constant_meta | {'sentence_id': sent_id, 'sentence_start': start_char})
-                        curr_note['results'].append(data)
-                        i += 1
+                    categories, matches = regex_func(sentence)
+                    if matches:
+                        for category, m in zip(categories, matches):
+                            data = {
+                                'index': i,
+                                'domain': domain,
+                                'category': category,
+                                'capture': m.group(),
+                                'start': m.start(),
+                                'end': m.end(),
+                            }
+                            writer.writerow(data | constant_meta | {'sentence_id': sent_id, 'sentence_start': start_char})
+                            curr_note['results'].append(data)
+                            i += 1
                 # write 1 line per input sentence
                 curr_note['results'] = sorted(curr_note['results'], key=lambda x: x['start'])
                 jsonl.write(json.dumps(constant_meta | curr_note) + '\n')

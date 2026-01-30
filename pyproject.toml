@@ -1,6 +1,7 @@
 [project]
 name = 'konsepy'
-dynamic = ['version', 'description']
+version = '0.1.1'
+description = 'Framework for build NLP information extraction systems using regular expressions.'
 authors = [
     { name = 'dcronkite', email = 'dcronkite+pypi@gmail.com' },
 ]
@@ -30,13 +31,15 @@ Home = 'https://github.com/kpwhri/konsepy'
 
 [dependency-groups]
 dev = [
-    'pytest',
-    'pytest-loguru',
+    'pytest>=9.0.0',
 ]
 ssplit = ['spacy']
 sas = ['sas7bdat']
 model = ['datasets', 'transformers']
 all = ['konsepy[sas,model]']
+
+[project.scripts]
+konsepy = 'konsepy.main:main'
 
 [tool.pytest.ini_options]
 testpaths = ["test"]

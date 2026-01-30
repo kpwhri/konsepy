@@ -2,7 +2,11 @@ import argparse
 import datetime
 import json
 from pathlib import Path
-from datasets import Dataset, Sequence
+try:
+    from datasets import Dataset, Sequence
+except ImportError:
+    Dataset = None
+    Sequence = None
 from konsepy.cli import clean_args
 from loguru import logger
 
@@ -72,7 +76,7 @@ def create_bio_dataset(path: Path, outpath: Path, test_size=0.1, validation_size
                     except StopIteration:
                         span_start, span_end = 100_000, 100_000
             if curr_word:
-                update_word(
+                span_is_middle = update_word(
                     i, tokens, ner_tags, curr_word, span_start,
                     span_is_middle, span_tag,
                 )

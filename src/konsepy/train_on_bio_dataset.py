@@ -2,6 +2,8 @@ import argparse
 import json
 from pathlib import Path
 
+from loguru import logger
+
 from transformers import AutoTokenizer, DataCollatorForTokenClassification, AutoModelForTokenClassification, \
     TrainingArguments, Trainer
 from datasets import load_dataset, load_from_disk, DatasetDict, load_metric
@@ -119,9 +121,9 @@ def train_on_bio_dataset(dataset_path: Path, outpath: Path, run_name: str, pretr
         json.dump(label2id, out)
 
     val_results = trainer.predict(tokenized_dataset['validation'])
-    print(val_results)
-    print(f'Label-2-id: {label2id}')
-    print(f'Id-2-label: {id2label}')
+    logger.info(val_results)
+    logger.info(f'Label-2-id: {label2id}')
+    logger.info(f'Id-2-label: {id2label}')
 
 
 def train_on_bio_dataset_args():

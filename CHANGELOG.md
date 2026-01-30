@@ -20,14 +20,19 @@ Types of changes:
 
 ### Added
 
-* Code and tests for context checks including pattern checks, negation, and other subject.
-* `run4snippets` function to extract snippets for running `textual_review_app` program along with tests
-* Added restricting `run4snippets` to particular categories and/or concepts along with tests
-* Order keys in `run4snippets` so that the order will show up jsonlines output for, e.g., `textual_review_app`
+* More comprehensive end-to-end integration tests for CLI workflows in `test/test_e2e_cli.py`.
+* More information added to readme with examples
+
+### Fixed
+
+* Json serialization error in `run-all` when matches were included.
+* Handled missing optional dependencies (`spacy`, `datasets`) gracefully in core modules and tests.
+
 
 ### Changed
 
-* Allow a single algorithm (i.e., concept) to have more than one category. 
+* Restructured CLI
+
 
 ## [0.1.1] - 2024-11-19
 

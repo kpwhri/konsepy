@@ -9,13 +9,14 @@ from konsepy.textio import iterate_csv_file, output_results
 from loguru import logger
 
 
-def run_regex_on_files(input_files, regex_func, *, start_after=0, stop_after=None,
+from konsepy.engine import ProcessingEngine
+
+def run_regex_on_files(input_files, regex_func, package_name=None, *, start_after=0, stop_after=None,
                        require_regex=None, window_size=50,
                        id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                        notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
                        noteorder_label=None, metadata_labels=None,
                        select_probability=1.0, **kwargs):
-    count = 0  # default value; received from forloop below
     cat_counter_notes = Counter()
     cat_counter_mrns = defaultdict(set)
     noteid_to_cat = defaultdict(Counter)
@@ -24,6 +25,16 @@ def run_regex_on_files(input_files, regex_func, *, start_after=0, stop_after=Non
     not_found_text = Counter()
     if require_regex:
         require_regex = re.compile(require_regex, re.I)
+
+    # Note: ProcessingEngine expects a package_name and concepts.
+    # Here regex_func is passed directly. We might need a slightly different approach
+    # if we want to use ProcessingEngine for generic regex_func.
+    # For now, I'll keep the original loop in run_regex_on_files to avoid over-complicating
+    # if it doesn't fit the "Concept" model perfectly, OR I adapt ProcessingEngine.
+    
+    # Actually, ProcessingEngine is designed for Concepts.
+    # run_regex_on_files is used by run_regex_and_output which iterates over concepts.
+    
     for count, mrn, note_id, note_date, text, metadata in iterate_csv_file(
             input_files, start_after=start_after, stop_after=stop_after,
             id_label=id_label, noteid_label=noteid_label,
@@ -73,16 +84,31 @@ def extract_categories(mrn, note_id, text, regex_func, *, categories=None,
 def run_regex_and_output(package_name, input_files, outdir, *concepts,
                          start_after=0, stop_after=None, require_regex=None, window_size=50,
                          id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
-                         notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
+                         notedate_label=NOTETEXT_LABEL, notetext_label=NOTETEXT_LABEL,
                          noteorder_label=None, select_probability=1.0, **kwargs):
     logger.info(f'Arguments ignored: {kwargs}')
     dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    for iconcept in get_all_concepts(package_name, *concepts):
+
+    # Use ProcessingEngine to consolidate concept loading and iteration
+    engine = ProcessingEngine(
+        input_files, package_name, start_after=start_after, stop_after=stop_after,
+        id_label=id_label, noteid_label=noteid_label,
+        notedate_label=notedate_label, notetext_label=notetext_label,
+        noteorder_label=noteorder_label, select_probability=select_probability,
+        concepts=concepts, **kwargs
+    )
+
+    # Note: the original run_regex_and_output created a separate output directory
+    # PER CONCEPT. This is a bit different from run_all.
+    # To maintain backward compatibility, we'll keep that behavior.
+
+    for iconcept in engine.concepts:
         curr_outdir = outdir / f'{iconcept.name}_{dt}'
         curr_outdir.mkdir(parents=True)
         logger.add(curr_outdir / f'{iconcept.name}_{dt}.log')
+
         note_counter, cat_counter_mrns, not_found_text, mrn_to_cat, note_to_cat = run_regex_on_files(
-            input_files, iconcept.run_func,
+            input_files, iconcept.run_func, package_name=package_name,
             start_after=start_after, stop_after=stop_after, require_regex=require_regex,
             window_size=window_size,
             id_label=id_label, noteid_label=noteid_label,

@@ -19,7 +19,10 @@ class DictReaderInsensitive(csv.DictReader):
 
     @property
     def fieldnames(self):
-        return [field.strip().lower() for field in csv.DictReader.fieldnames.fget(self)]
+        fnames = csv.DictReader.fieldnames.fget(self)
+        if fnames is None:
+            return None
+        return [field.strip().lower() for field in fnames]
 
 
 def iterate_csv_file(input_files, *, start_after=0, stop_after=None,

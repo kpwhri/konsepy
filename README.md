@@ -14,7 +14,39 @@ Framework for build NLP information extraction systems using regular expressions
 
 ## Usage
 
-For now, find documentation for this library (and a template to download) from https://github.com/kpwhri/konsepy_nlp_template.
+The package provides a centralized CLI tool `konsepy`.
+
+### Building your NLP Package
+
+To use `konsepy`, you need to create an NLP package (e.g., `my_nlp_package`) with the following structure:
+
+```text
+my_nlp_package/
+├── __init__.py
+└── concepts/
+    ├── __init__.py
+    └── my_concept.py
+```
+
+Each concept file (e.g., `my_concept.py`) must define:
+* `REGEXES`: A list of regex-category pairs.
+* `RUN_REGEXES_FUNC`: A function that executes the regexes and returns categories/matches.
+* `CategoryEnum`: An `Enum` defining the possible categories for the concept.
+
+### Running konsepy
+
+```bash
+# Run all concepts in a package against input files
+konsepy run-all --package-name my_nlp_package --input-files data.csv --outdir output/
+
+# Extract snippets for manual review
+konsepy run4snippets --package-name my_nlp_package --input-files data.csv --outdir snippets/
+
+# Generate BIO tagged data for model training
+konsepy bio-tag --package-name my_nlp_package --input-files data.csv --outdir bio_data/
+```
+
+For more detailed documentation and a template, see [konsepy_nlp_template](https://github.com/kpwhri/konsepy_nlp_template).
 
 
 ## Roadmap
