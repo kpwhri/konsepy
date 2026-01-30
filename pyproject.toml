@@ -1,6 +1,6 @@
 [project]
 name = 'konsepy'
-version = '0.2.0'
+version = '0.2.1'
 description = 'Framework for build NLP information extraction systems using regular expressions.'
 authors = [
     { name = 'dcronkite', email = 'dcronkite+pypi@gmail.com' },
@@ -33,10 +33,19 @@ Home = 'https://github.com/kpwhri/konsepy'
 dev = [
     'pytest>=9.0.0',
 ]
-ssplit = ['spacy']
-sas = ['sas7bdat']
-model = ['datasets', 'transformers']
-all = ['konsepy[sas,model]']
+ssplit = [
+    'spacy'
+]
+sas = [
+    'sas7bdat'
+]
+model = [
+    'datasets',
+    'transformers',
+]
+all = [
+    'konsepy[sas,model]'
+]
 
 [project.scripts]
 konsepy = 'konsepy.main:main'
