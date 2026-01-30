@@ -43,6 +43,10 @@ model = [
     'datasets',
     'transformers',
 ]
+all = [
+    'sas',
+    'model',
+]
 
 [dependency-groups]
 dev = [
@@ -59,7 +63,8 @@ model = [
     'transformers',
 ]
 all = [
-    'konsepy[sas,model]'
+    'sas',
+    'model',
 ]
 
 [project.scripts]
