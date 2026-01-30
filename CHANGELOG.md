@@ -18,6 +18,12 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-01-30
+
+### Fixed
+
+* Ensure that all `rxsearch` functions and the context function share the same API (return, not yield)
+
 ## [0.3.0] - 2026-01-30
 
 ### Added

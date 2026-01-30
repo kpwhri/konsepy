@@ -245,16 +245,14 @@ def search_all_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=None):
                         for func in funcs:
                             if func is None:
                                 continue
-                            for res in func(**get_contexts(m, text, window, word_window=word_window)):
-                                if res:
-                                    yield (res, m) if include_match else res
-                                    found = True
-                                    found_any = True
-                                    if hasattr(res, 'name') and res.name != 'UNKNOWN':
-                                        found_non_unknown = True
-                                    elif not hasattr(res, 'name') and res != 'UNKNOWN':
-                                        found_non_unknown = True
-                                    break
+                            if res := func(**get_contexts(m, text, window, word_window=word_window)):
+                                yield (res, m) if include_match else res
+                                found = True
+                                found_any = True
+                                if hasattr(res, 'name') and res.name != 'UNKNOWN':
+                                    found_non_unknown = True
+                                elif not hasattr(res, 'name') and res != 'UNKNOWN':
+                                    found_non_unknown = True
                             if found:
                                 break
                         if not found_any and category is not None:

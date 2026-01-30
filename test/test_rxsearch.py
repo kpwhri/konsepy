@@ -168,7 +168,7 @@ def test_search_all_regex_func_word_window():
     def check_context(precontext, **kwargs):
         # With word_window=2, precontext for 'sang' should be 'Old Väinämöinen '
         if 'Old Väinämöinen' in precontext:
-            yield 'SINGER'
+            return 'SINGER'
 
     regexes = [
         (re.compile(r'sang', re.I), 'UNKNOWN', check_context),

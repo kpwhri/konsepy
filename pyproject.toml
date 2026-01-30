@@ -1,6 +1,6 @@
 [project]
 name = 'konsepy'
-version = '0.3.1'
+version = '0.3.2'
 description = 'Framework for build NLP information extraction systems using regular expressions.'
 authors = [
     { name = 'dcronkite', email = 'dcronkite+pypi@gmail.com' },
