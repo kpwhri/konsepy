@@ -176,7 +176,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.3.0...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.3.2...HEAD
+
+[0.3.2]: https://github.com/kpwhri/konsepy/compare/v0.3.0...v0.3.2
 
 [0.3.0]: https://github.com/kpwhri/konsepy/compare/v0.2.3...v0.3.0
 
