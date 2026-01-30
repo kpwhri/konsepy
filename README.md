@@ -18,7 +18,7 @@ The package provides a centralized CLI tool `konsepy`.
 
 ### Building your NLP Package
 
-To use `konsepy`, you need to create an NLP package (e.g., `my_nlp_package`) with the following structure:
+To use `konsepy`, you need to create an NLP package (e.g., `my_nlp_package`) with the following structure. The best way to get this format is to clone the [konsepy_nlp_template](https://github.com/kpwhri/konsepy_nlp_template):
 
 ```text
 my_nlp_package/

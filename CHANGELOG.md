@@ -18,6 +18,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-01-29
+
 ### Added
 
 * More comprehensive end-to-end integration tests for CLI workflows in `test/test_e2e_cli.py`.
@@ -144,7 +146,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/0.1.1...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.2.0...HEAD
+
+[0.2.0]: https://github.com/kpwhri/konsepy/compare/0.1.1...v0.2.0
 
 [0.1.1]: https://github.com/kpwhri/konsepy/compare/0.1.0...0.1.1
 
