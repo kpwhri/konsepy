@@ -1,13 +1,16 @@
 from konsepy.context.contexts import get_contexts
 
+_DEFAULT_WINDOW = 30
 
-def search_first_regex(regexes, window=30):
+
+def search_first_regex(regexes, window=_DEFAULT_WINDOW, word_window=None):
     """
     For each regex in the list, return only the first match found in the text.
 
     Args:
         regexes: List of tuples (regex, category, *other).
         window: Context window size for functions.
+        word_window: Size of context window in terms of words (overrides default window)
 
     Returns:
         A function that takes text and returns a generator of results.
@@ -19,7 +22,8 @@ def search_first_regex(regexes, window=30):
             funcs = _unpack_other_funcs(other)
             for m in regex.finditer(text):
                 found = True
-                yield from _yield_categories(m, category, funcs, text, window, include_match=include_match)
+                yield from _yield_categories(m, category, funcs, text, window,
+                                             word_window=word_window, include_match=include_match)
                 break
             if found:
                 break
@@ -27,13 +31,14 @@ def search_first_regex(regexes, window=30):
     return _search_first_regex
 
 
-def search_all_regex(regexes, window=30):
+def search_all_regex(regexes, window=_DEFAULT_WINDOW, word_window=None):
     """
     For each regex in the list, return all matches found in the text.
 
     Args:
         regexes: List of tuples (regex, category, *other).
         window: Context window size for functions.
+        word_window: Size of context window in terms of words (overrides default window)
 
     Returns:
         A function that takes text and returns a generator of results.
@@ -43,18 +48,20 @@ def search_all_regex(regexes, window=30):
         for regex, category, *other in regexes:
             funcs = _unpack_other_funcs(other)
             for m in regex.finditer(text):
-                yield from _yield_categories(m, category, funcs, text, window, include_match=include_match)
+                yield from _yield_categories(m, category, funcs, text, window,
+                                             word_window=word_window, include_match=include_match)
 
     return _search_all_regex
 
 
-def get_all_regex_by_index(regexes, window=30):
+def get_all_regex_by_index(regexes, window=_DEFAULT_WINDOW, word_window=None):
     """
     For each regex, return all results along with their start and end indices.
 
     Args:
         regexes: List of tuples (regex, category, *other).
         window: Context window size for functions.
+        word_window: Size of context window in terms of words (overrides default window)
 
     Returns:
         A function that takes text and returns a generator of (result, match_text, start, end).
@@ -64,7 +71,7 @@ def get_all_regex_by_index(regexes, window=30):
         for regex, category, *other in regexes:
             funcs = _unpack_other_funcs(other)
             for m in regex.finditer(text):
-                for res in _yield_categories(m, category, funcs, text, window):
+                for res in _yield_categories(m, category, funcs, text, window, word_window=word_window):
                     if isinstance(res, (list, tuple)):
                         res, m2 = res
                         yield res, m2.group(), m2.start(), m2.end()
@@ -74,13 +81,14 @@ def get_all_regex_by_index(regexes, window=30):
     return _get_all_regex_by_index
 
 
-def search_all_regex_match_func(regexes, window=30):
+def search_all_regex_match_func(regexes, window=_DEFAULT_WINDOW, word_window=None):
     """
     For each regex, apply functions to the match object to determine the result.
 
     Args:
         regexes: List of tuples (regex, category, *other).
         window: Context window size for functions.
+        word_window: Size of context window in terms of words (overrides default window)
 
     Returns:
         A function that takes text and returns a generator of results.
@@ -90,7 +98,8 @@ def search_all_regex_match_func(regexes, window=30):
         for regex, category, *other in regexes:
             funcs = _unpack_other_funcs(other)
             for m in regex.finditer(text):
-                yield from _yield_categories(m, category, funcs, text, window, include_match=include_match)
+                yield from _yield_categories(m, category, funcs, text, window,
+                                             word_window=word_window, include_match=include_match)
 
     return _search_all_regex
 
@@ -110,11 +119,11 @@ def _unpack_other_funcs(other):
     return None
 
 
-def _yield_categories(m, category, funcs, text, window, include_match=False):
+def _yield_categories(m, category, funcs, text, window, *, word_window=None, include_match=False):
     """Helper to yield categories based on functions and match object."""
     if funcs:
         for func in funcs:
-            if func and (res := func(**get_contexts(m, text, window))):
+            if func and (res := func(**get_contexts(m, text, window, word_window=word_window))):
                 if isinstance(res, list):
                     res, m = res  # category, match
                 yield (res, m) if include_match else res
@@ -124,7 +133,7 @@ def _yield_categories(m, category, funcs, text, window, include_match=False):
         yield (category, m) if include_match else category
 
 
-def search_and_replace_regex_func(regexes, window=30):
+def search_and_replace_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=None):
     """
     Search for regexes, but replace found text with dots to prevent double-matching.
 
@@ -134,6 +143,7 @@ def search_and_replace_regex_func(regexes, window=30):
     Args:
         regexes: List of tuples (regex, category, *other).
         window: Context window size for functions.
+        word_window: Size of context window in terms of words (overrides default window)
 
     Returns:
         A function that takes text and returns a generator of results.
@@ -148,7 +158,7 @@ def search_and_replace_regex_func(regexes, window=30):
                 found = None
                 if funcs:
                     for func in funcs:  # parse function in order
-                        if res := func(**get_contexts(m, text, window)):
+                        if res := func(**get_contexts(m, text, window, word_window=word_window)):
                             found = (res, m) if include_match else res
                             break
                 if found:
@@ -166,13 +176,14 @@ def search_and_replace_regex_func(regexes, window=30):
     return _search_all_regex
 
 
-def search_first_regex_func(regexes, window=30):
+def search_first_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=None):
     """
     Return only the very first result found among all regexes.
 
     Args:
         regexes: List of tuples (regex, category, *other).
         window: Context window size for functions.
+        word_window: Size of context window in terms of words (overrides default window)
 
     Returns:
         A function that takes text and returns a generator yielding at most one result.
@@ -183,14 +194,15 @@ def search_first_regex_func(regexes, window=30):
             funcs = _unpack_other_funcs(other)
 
             for m in regex.finditer(text):
-                for res in _yield_categories(m, category, funcs, text, window, include_match=include_match):
+                for res in _yield_categories(m, category, funcs, text, window,
+                                             word_window=word_window, include_match=include_match):
                     yield res
                     return
 
     return _search_first_regex
 
 
-def search_all_regex_func(regexes, window=30):
+def search_all_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=None):
     """
     For each regex, return all matches, running any provided context functions.
 
@@ -200,6 +212,7 @@ def search_all_regex_func(regexes, window=30):
     Args:
         regexes: List of tuples (regex, category, *other).
         window: Context window size for functions.
+        word_window: Size of context window in terms of words (overrides default window)
 
     Returns:
         A function that takes text and returns a generator of results.
@@ -232,7 +245,7 @@ def search_all_regex_func(regexes, window=30):
                         for func in funcs:
                             if func is None:
                                 continue
-                            for res in func(**get_contexts(m, text, window)):
+                            for res in func(**get_contexts(m, text, window, word_window=word_window)):
                                 if res:
                                     yield (res, m) if include_match else res
                                     found = True

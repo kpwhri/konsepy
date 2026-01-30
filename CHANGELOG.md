@@ -20,11 +20,14 @@ Types of changes:
 
 ### Added
 
+* Added `word_window` parameter to `get_contexts` and related functions to allow retrieving context based on word count.
+* Added tests for `word_window` in `test_rxsearch.py`.
 * Improved documentation for search functions (now in `konsepy.rxsearch`) in README.
 
 ### Changed
 
 * Created `konsepy.rxsearch` module to house regex search functions, and create separate tests for them (no longer in `regex`)
+
 
 ## [0.2.3] - 2026-01-29
 

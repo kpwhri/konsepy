@@ -50,7 +50,7 @@ Example of `my_concept.py`:
 ```python
 import re
 from enum import Enum
-from konsepy.rxsearch import search_all_regex
+from konsepy.rxsearch import search_all_regex_func
 from konsepy.context.negation import check_if_negated
 from konsepy.context.other_subject import check_if_other_subject
 
@@ -71,7 +71,10 @@ REGEXES = [
    ),
 ]
 
-RUN_REGEXES_FUNC = search_all_regex(REGEXES)
+# word_window specifies the number of words to retrieve for context functions (instead of character):
+RUN_REGEXES_FUNC = search_all_regex_func(REGEXES, word_window=5)
+# to alter the character-based window:
+RUN_REGEXES_FUNC = search_all_regex_func(REGEXES, window=50)  # defaults to 30
 ```
 
 #### Custom Search Functions
