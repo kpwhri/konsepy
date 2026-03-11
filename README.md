@@ -44,6 +44,30 @@ Each concept file (e.g., `my_concept.py`) must define:
 - `search_and_replace_regex_func`: Prevents double-matching by replacing found text with dots before proceeding to the next regex.
 - `search_all_regex_func`: Supports "sentinel" values (None) to stop processing if a match was found earlier.
 
+#### Regex Utilities
+
+`konsepy` includes `KonsepyRegex` in `konsepy.rxutils` to allow for duplicate named groups in alternation branches:
+
+```python
+import re
+from konsepy.rxutils import KonsepyRegex
+
+pattern = KonsepyRegex(
+  r'(?:score: (?P<val>\d+)|results: (?P<val>\d+))',
+  flags=re.I,
+  allow_dupe_names=True,
+)
+# m.group("val") will return whichever branch matched
+```
+
+You can also use the shorthand helper `rx_compile`:
+
+```python
+from konsepy.rxutils import rx_compile
+
+pattern = rx_compile(r'(?:this: (?P<val>\d+)|results: (?P<val>\d+))')
+```
+
 Example of `my_concept.py`:
 ```python
 import re
@@ -93,6 +117,9 @@ def my_custom_search(regexes):
 ```bash
 # Run all concepts in a package against input files
 konsepy run-all --package-name my_nlp_package --input-files data.csv --outdir output/
+
+# Run and output individual matches as JSONL (useful for match-level analysis)
+konsepy run-all-matches --package-name my_nlp_package --input-files data.csv --outdir output/
 
 # Extract snippets for manual review
 konsepy run4snippets --package-name my_nlp_package --input-files data.csv --outdir snippets/

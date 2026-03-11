@@ -18,6 +18,12 @@ Types of changes:
 
 ## [Unreleased]
 
+### Added
+
+* Added `run-all-matches` command to output each individual match as a separate row in a jsonl file.
+* Flattened named regex capture groups into top-level keys.
+* Added handling of duplicate named groups in regex patterns via internally managed renaming and proxy wrapping (`KonsepyRegex` and `rx_compile`).
+
 ## [0.3.2] - 2026-01-30
 
 ### Fixed

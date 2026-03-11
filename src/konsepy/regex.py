@@ -26,6 +26,7 @@ def run_regex_on_files(input_files, regex_func, package_name=None, *, start_afte
     if require_regex:
         require_regex = re.compile(require_regex, re.I)
 
+    count = 0
     for count, mrn, note_id, note_date, text, metadata in iterate_csv_file(
             input_files, start_after=start_after, stop_after=stop_after,
             id_label=id_label, noteid_label=noteid_label,
@@ -89,10 +90,7 @@ def run_regex_and_output(package_name, input_files, outdir, *concepts,
         concepts=concepts, **kwargs
     )
 
-    # Note: the original run_regex_and_output created a separate output directory
-    # PER CONCEPT. This is a bit different from run_all.
-    # To maintain backward compatibility, we'll keep that behavior.
-
+    # creates a separate output directory per concept
     for iconcept in engine.concepts:
         curr_outdir = outdir / f'{iconcept.name}_{dt}'
         curr_outdir.mkdir(parents=True)

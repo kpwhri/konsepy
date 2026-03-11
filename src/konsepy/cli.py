@@ -74,6 +74,10 @@ def add_run_all_args(parser: argparse.ArgumentParser = None):
                         help='Do not retain summarized output, just output incremental jsonl file.')
     parser.add_argument('--concepts', nargs='+', default=False,
                         help='Look for these particular concepts.')
+    parser.add_argument('--window-size', dest='window', default=30, type=int,
+                        help='Change the window for the pre/post contexts')
+    parser.add_argument('--word-window', dest='word_window', default=None, type=int,
+                        help='Change the word window for the pre/post contexts')
 
 
 def _get_casting_func(target, format_=None):

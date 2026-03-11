@@ -4,6 +4,7 @@ from pathlib import Path
 from loguru import logger
 
 from konsepy.run_all import run_all
+from konsepy.run_all_matches import run_all_matches
 from konsepy.run4snippets import run4snippets
 from konsepy.bio_tag import get_bio_tags
 from konsepy.corpus2jsonl import corpus2jsonl
@@ -23,6 +24,13 @@ def main():
                                 help='Name of package to run regular expressions from.')
     run_all_parser.add_argument('--include-text-output', action='store_true',
                                 help='Include original text in output jsonl.')
+
+    # run-all-matches
+    run_all_matches_parser = subparsers.add_parser('run-all-matches', help='Run all concepts and output each match')
+    add_outdir_and_infiles(run_all_matches_parser)
+    add_run_all_args(run_all_matches_parser)
+    run_all_matches_parser.add_argument('--package-name', required=True,
+                                        help='Name of package to run regular expressions from.')
 
     # run4snippets
     run4snippets_parser = subparsers.add_parser('run4snippets', help='Extract snippets for review')
@@ -76,6 +84,8 @@ def main():
 
     if command == 'run-all':
         run_all(**cmd_args)
+    elif command == 'run-all-matches':
+        run_all_matches(**cmd_args)
     elif command == 'run4snippets':
         run4snippets(**cmd_args)
     elif command == 'bio-tag':

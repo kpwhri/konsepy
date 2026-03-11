@@ -58,6 +58,43 @@ def test_cli_run_all(tmp_path, input_file):
         assert 'categories' in first_entry
 
 
+def test_cli_run_all_matches(tmp_path, input_file):
+    outdir = tmp_path / 'run_all_matches_out'
+    outdir.mkdir()
+
+    test_args = [
+        'konsepy',
+        'run-all-matches',
+        '--input-files', str(input_file),
+        '--outdir', str(outdir),
+        '--package-name', 'example_nlp',
+        '--id-label', 'chapter',
+        '--noteid-label', 'chapter',
+    ]
+
+    with patch.object(sys, 'argv', test_args):
+        main()
+
+    # verify that an output directory was created (it has a timestamp)
+    run_all_dirs = list(outdir.glob('run_all_matches_*'))
+    assert len(run_all_dirs) == 1
+    actual_outdir = run_all_dirs[0]
+
+    assert (actual_outdir / 'output.jsonl').exists()
+
+    with open(actual_outdir / 'output.jsonl', encoding='utf8') as f:
+        lines = f.readlines()
+        assert len(lines) > 0
+        first_entry = json.loads(lines[0])
+        assert 'concept' in first_entry
+        assert 'category' in first_entry
+        assert 'precontext' in first_entry
+        assert 'match' in first_entry
+        assert 'postcontext' in first_entry
+        assert 'start_index' in first_entry
+        assert 'end_index' in first_entry
+
+
 def test_cli_run4snippets(tmp_path, input_file):
     outdir = tmp_path / 'snippets_out'
     outdir.mkdir()

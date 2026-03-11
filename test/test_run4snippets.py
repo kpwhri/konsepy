@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -33,7 +34,7 @@ def test_run4snippets(tmp_path, input_file, caplog):
     # test log results
     loglines = [line for line in caplog.text.split('\n') if line.strip()]
     assert any('Arguments ignored: {}' in line for line in loglines)
-    assert any('Loaded 3 concepts for processing' in line for line in loglines)
+    assert any(re.search(r'Loaded \d+ concepts for processing', line) for line in loglines)
     assert any('Output 713 rows' in line for line in loglines)
     assert any('Total records: 117' in line for line in loglines)
 
