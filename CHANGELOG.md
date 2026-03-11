@@ -18,6 +18,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-03-11
+
 ### Added
 
 * Added `run-all-matches` command to output each individual match as a separate row in a jsonl file.
@@ -182,7 +184,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.3.2...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.4.0...HEAD
+
+[0.4.0]: https://github.com/kpwhri/konsepy/compare/v0.3.2...v0.4.0
 
 [0.3.2]: https://github.com/kpwhri/konsepy/compare/v0.3.0...v0.3.2
 
