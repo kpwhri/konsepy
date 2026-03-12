@@ -80,11 +80,27 @@ class KonsepyMatch:
         """Forward any other attributes to the original match object."""
         return getattr(self._match, name)
 
+    def __str__(self):
+        data = {
+            'match': self.group(0),
+            'span': self.span(),
+        }
+        groups = self.groupdict()
+        if groups:
+            data['groups'] = groups
+        args = ', '.join(f'{k}={v!r}' for k, v in data.items())
+        return f'KonsepyMatch({args})'
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class KonsepyRegex:
     """Wrapper for compiled regex that handles optional duplicate named groups."""
 
     def __init__(self, pattern: Union[str, re.Pattern], flags: int = 0, allow_dupe_names: bool = True):
+        self._original_pattern = pattern.pattern if isinstance(pattern, re.Pattern) else pattern
+        self._flags = flags
         self._group_mapping = {}
         if allow_dupe_names and isinstance(pattern, str):
             # find all (?P<name>...)
@@ -143,6 +159,22 @@ class KonsepyRegex:
     def __getattr__(self, name):
         """Forward any other attributes to the original pattern object."""
         return getattr(self._pattern, name)
+
+    def __str__(self):
+        group_names = list(self._group_mapping.keys()) if self._group_mapping else []
+        return (
+            f'KonsepyRegex(pattern={self._original_pattern!r}, '
+            f'groups={group_names!r})'
+        )
+
+    def __repr__(self):
+        return (
+            f'KonsepyRegex('
+            f'pattern={self._original_pattern!r}, '
+            f'compiled={self._pattern.pattern!r}, '
+            f'flags={self._flags!r}, '
+            f'group_mapping={self._group_mapping!r})'
+        )
 
 
 def rx_compile(pattern: str, flags: int = 0) -> KonsepyRegex:

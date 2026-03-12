@@ -18,6 +18,13 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-03-11
+
+### Added
+
+* Improved str representation for konsepy matches/regexes.
+
+
 ## [0.4.0] - 2026-03-11
 
 ### Added
@@ -184,7 +191,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.4.0...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.4.1...HEAD
+
+[0.4.1]: https://github.com/kpwhri/konsepy/compare/v0.4.0...v0.4.1
 
 [0.4.0]: https://github.com/kpwhri/konsepy/compare/v0.3.2...v0.4.0
 

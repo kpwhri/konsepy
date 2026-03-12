@@ -111,3 +111,44 @@ def test_multiple_args_to_group():
     compiled = rx_compile(pattern)
     m = compiled.search('B')
     assert m.group(0, 'a') == ('B', 'B')
+
+
+def test_konsepy_regex_str_shows_user_facing_pattern_and_groups():
+    regex = KonsepyRegex(
+        r'(?:score: (?P<val>\d+)|results: (?P<val>\d+))',
+        flags=re.I,
+    )
+
+    text = str(regex)
+
+    assert text.startswith('KonsepyRegex(')
+    assert r"pattern='(?:score: (?P<val>\\d+)|results: (?P<val>\\d+))'" in text
+    assert "groups=['val']" in text
+
+
+def test_konsepy_regex_repr_shows_compiled_pattern_and_group_mapping():
+    regex = KonsepyRegex(
+        r'(?:score: (?P<val>\d+)|results: (?P<val>\d+))',
+        flags=re.I,
+    )
+
+    text = repr(regex)
+
+    assert text.startswith('KonsepyRegex(')
+    assert r"pattern='(?:score: (?P<val>\\d+)|results: (?P<val>\\d+))'" in text
+    assert r"compiled='(?:score: (?P<val>\\d+)|results: (?P<val__dup2>\\d+))'" in text
+    assert 'flags=' in text
+    assert "'val': ['val', 'val__dup2']" in text
+
+
+def test_konsepy_regex_str_without_dupe_names_is_clear():
+    regex = KonsepyRegex(
+        r'(?P<word>\w+)',
+        allow_dupe_names=True,
+    )
+
+    text = str(regex)
+
+    assert text.startswith('KonsepyRegex(')
+    assert r"pattern='(?P<word>\\w+)'" in text
+    assert "groups=['word']" in text
