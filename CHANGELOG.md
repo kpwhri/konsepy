@@ -18,6 +18,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-05-13
+
 ### Changed
 
 - Made `search_all_regex()` and `search_first_regex()` the canonical regex search functions, and all others deprecated
@@ -198,7 +200,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.4.1...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.5.0...HEAD
+
+[0.5.0]: https://github.com/kpwhri/konsepy/compare/v0.4.1...v0.5.0
 
 [0.4.1]: https://github.com/kpwhri/konsepy/compare/v0.4.0...v0.4.1
 
