@@ -18,6 +18,13 @@ Types of changes:
 
 ## [Unreleased]
 
+### Changed
+
+- Made `search_all_regex()` and `search_first_regex()` the canonical regex search functions, and all others deprecated
+- Explicit definitions and cross-function support for postprocessors and preprocessors.
+- Added extraction helpers and target-group extraction wrappers.
+- Replaced `search_and_replace_regex_func()` with option to `suppress_overlaps=True` to prevent later regexes from matching spans already claimed by earlier matches.
+
 ## [0.4.1] - 2026-03-11
 
 ### Added
