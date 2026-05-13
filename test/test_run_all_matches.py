@@ -1,10 +1,9 @@
 import json
-from pathlib import Path
 from konsepy.run_all_matches import run_all_matches
 
 
-def test_run_all_matches_direct(tmp_path):
-    input_file = Path('test/data/corpus.jsonl')
+def test_run_all_matches_direct(tmp_path, datadir):
+    input_file = datadir / 'corpus.jsonl'
     outdir = tmp_path / 'direct_run'
     outdir.mkdir()
 

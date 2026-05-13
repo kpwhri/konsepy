@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 import pytest
 from loguru import logger
 
@@ -18,3 +19,12 @@ def caplog(caplog):
 def saiga_antelope():
     return 'Saiga antelope have distinctive bulbous noses. These help filter out dust and regulate their' \
            'body temperature in the harsh climates of Central Asia.'
+
+
+@pytest.fixture
+def basedir() -> Path:
+    return Path(__file__).resolve().parent
+
+@pytest.fixture
+def datadir(basedir) -> Path:
+    return basedir / 'data'
