@@ -7,21 +7,31 @@ authors = [
 ]
 readme = 'README.md'
 dependencies = [
-    'loguru>=0.7.0'
+    "loguru>=0.7.3",
 ]
-requires-python = '>=3.10'
+requires-python = '>=3.11'
 keywords = [
     'nlp',
+    'natural-language-processing',
+    'information-extraction',
+    'text-processing',
+    'text-mining',
+    'regular-expressions',
+    'regex',
+    'rule-based',
+    'clinical-nlp',
+    'healthcare',
+    'medical-nlp',
 ]
 classifiers = [# https://pypi.org/classifiers/
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Science/Research',
     'Programming Language :: Python :: 3 :: Only',
-    'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
     'Programming Language :: Python :: 3.14',
+    'Programming Language :: Python :: 3.15',
     'Topic :: Text Processing :: Linguistic',
     'License :: OSI Approved :: MIT License',
     'Intended Audience :: Healthcare Industry',
@@ -32,7 +42,7 @@ Home = 'https://github.com/kpwhri/konsepy'
 
 [project.optional-dependencies]
 dev = [
-    'pytest>=9.0.0',
+    'pytest>=9.0.3',
 ]
 ssplit = [
     'spacy'
@@ -45,13 +55,15 @@ model = [
     'transformers',
 ]
 all = [
-    'sas',
-    'model',
+    'spacy',
+    'sas7bdat',
+    'datasets',
+    'transformers',
 ]
 
 [dependency-groups]
 dev = [
-    'pytest>=9.0.0',
+    'pytest>=9.0.3',
 ]
 ssplit = [
     'spacy'
@@ -64,8 +76,10 @@ model = [
     'transformers',
 ]
 all = [
-    'sas',
-    'model',
+    'spacy',
+    'sas7bdat',
+    'datasets',
+    'transformers',
 ]
 
 [project.scripts]
