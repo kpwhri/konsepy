@@ -15,7 +15,8 @@ def input_file(request):
 def iter_jsonl_output(outdir: Path, extra_keys=None):
     extra_keys = set(extra_keys) if extra_keys else set()
     exp_keys = {'note_id', 'concept', 'category', 'studyid', 'note_date', 'match', 'start_index',
-                'end_index', 'precontext', 'postcontext', 'pretext', 'posttext'} | extra_keys
+                'end_index', 'target', 'target_start_index', 'target_end_index',
+                'precontext', 'postcontext', 'pretext', 'posttext'} | extra_keys
     with open(outdir / 'output.jsonl', encoding='utf8') as fh:
         for line in fh:
             data = json.loads(line)

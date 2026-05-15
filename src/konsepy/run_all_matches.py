@@ -12,7 +12,8 @@ def run_all_matches(input_files, outdir: pathlib.Path, package_name: str, *,
                     encoding='latin1', id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                     notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
                     noteorder_label=None, metadata_labels=None,
-                    concepts=None, limit_noteids=None, window=30, word_window=None, **kwargs) -> pathlib.Path:
+                    concepts=None, limit_noteids=None, window=30, word_window=None,
+                    group_name='target', **kwargs) -> pathlib.Path:
     """
     Run all concepts and output each match as a separate JSONL row.
     Return: Newly created `run_all_matches` directory.
@@ -54,11 +55,18 @@ def run_all_matches(input_files, outdir: pathlib.Path, package_name: str, *,
                     'postcontext': contexts['postcontext'],
                     'start_index': m.start(),
                     'end_index': m.end(),
+                    'target': None,
+                    'target_start_index': None,
+                    'target_end_index': None,
                 }
                 if metadata:
                     row.update(metadata)
                 if group_dict := m.groupdict():
                     row.update(group_dict)
+                    if group_dict.get(group_name) is not None:
+                        row['target'] = m.group(group_name)
+                        row['target_start_index'] = m.start(group_name)
+                        row['target_end_index'] = m.end(group_name)
 
                 out.write(json.dumps(row) + '\n')
 

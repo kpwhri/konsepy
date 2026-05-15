@@ -26,7 +26,7 @@ def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
                  encoding='utf8', id_label=ID_LABEL, noteid_label=NOTEID_LABEL,
                  notedate_label=NOTEDATE_LABEL, notetext_label=NOTETEXT_LABEL,
                  noteorder_label=None, metadata_labels=None,
-                 concepts=None, limit_noteids=None, **kwargs) -> pathlib.Path:
+                 concepts=None, limit_noteids=None, group_name='target', **kwargs) -> pathlib.Path:
     """
     Run all concepts.
     Return: Newly created `run_all` directory.
@@ -58,7 +58,9 @@ def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
     all_keys = [
                    'note_id', 'concept', 'category', 'studyid', 'note_date', 'match',
                ] + list(metadata_labels.keys()) + [
-                   'start_index', 'end_index', 'precontext', 'postcontext', 'pretext', 'posttext',
+                   'start_index', 'end_index',
+                   'target', 'target_start_index', 'target_end_index',
+                   'precontext', 'postcontext', 'pretext', 'posttext',
                ]
     ordered_keys = order_metadata + [key for key in all_keys if key not in order_metadata]
 
@@ -67,6 +69,17 @@ def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
             for m, category in zip(matches, categories):
                 if _retain_record(concept, category, target_categories, target_concepts):
                     output_length[0] += 1
+
+                    category = category.name if hasattr(category, 'name') else str(category)
+
+                    target = None
+                    target_start_index = None
+                    target_end_index = None
+
+                    if group_name in m.groupdict() and m.group(group_name) is not None:
+                        target = m.group('group_name')
+                        target_start_index = m.start('group_name')
+                        target_end_index = m.end(group_name)
                     curr_data = {
                                     'note_id': note_id,
                                     'concept': concept.name,
@@ -76,6 +89,9 @@ def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
                                     'match': m.group(),
                                     'start_index': m.start(),
                                     'end_index': m.end(),
+                                    'target': target,
+                                    'target_start_index': target_start_index,
+                                    'target_end_index': target_end_index,
                                     'precontext': text[max(m.start() - context_length, 0): m.start()],
                                     'postcontext': text[m.end(): m.end() + context_length],
                                     'pretext': text[max(m.start() - max_window, 0): m.start()],
