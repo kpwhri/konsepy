@@ -18,6 +18,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.5.1]
+
 ### Added
 
 * Added test utility
@@ -33,7 +35,8 @@ Types of changes:
 * Made `search_all_regex()` and `search_first_regex()` the canonical regex search functions, and all others deprecated
 * Explicit definitions and cross-function support for postprocessors and preprocessors.
 * Added extraction helpers and target-group extraction wrappers.
-* Replaced `search_and_replace_regex_func()` with option to `suppress_overlaps=True` to prevent later regexes from matching spans already claimed by earlier matches.
+* Replaced `search_and_replace_regex_func()` with option to `suppress_overlaps=True` to prevent later regexes from
+  matching spans already claimed by earlier matches.
 
 ## [0.4.1] - 2026-03-11
 
@@ -41,14 +44,14 @@ Types of changes:
 
 * Improved str representation for konsepy matches/regexes.
 
-
 ## [0.4.0] - 2026-03-11
 
 ### Added
 
 * Added `run-all-matches` command to output each individual match as a separate row in a jsonl file.
 * Flattened named regex capture groups into top-level keys.
-* Added handling of duplicate named groups in regex patterns via internally managed renaming and proxy wrapping (`KonsepyRegex` and `rx_compile`).
+* Added handling of duplicate named groups in regex patterns via internally managed renaming and proxy wrapping (
+  `KonsepyRegex` and `rx_compile`).
 
 ## [0.3.2] - 2026-01-30
 
@@ -66,8 +69,8 @@ Types of changes:
 
 ### Changed
 
-* Created `konsepy.rxsearch` module to house regex search functions, and create separate tests for them (no longer in `regex`)
-
+* Created `konsepy.rxsearch` module to house regex search functions, and create separate tests for them (no longer in
+  `regex`)
 
 ## [0.2.3] - 2026-01-29
 
@@ -92,11 +95,9 @@ Types of changes:
 * Json serialization error in `run-all` when matches were included.
 * Handled missing optional dependencies (`spacy`, `datasets`) gracefully in core modules and tests.
 
-
 ### Changed
 
 * Restructured CLI
-
 
 ## [0.1.1] - 2024-11-19
 
@@ -208,7 +209,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.5.0...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.5.1...HEAD
+
+[0.5.1]: https://github.com/kpwhri/konsepy/compare/v0.5.0...v0.5.1
 
 [0.5.0]: https://github.com/kpwhri/konsepy/compare/v0.4.1...v0.5.0
 
