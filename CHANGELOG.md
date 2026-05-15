@@ -22,6 +22,10 @@ Types of changes:
 
 * Added test utility
 
+### Fixed
+
+* Extraction is no longer added as a postprocessor.
+
 ## [0.5.0] - 2026-05-13
 
 ### Changed

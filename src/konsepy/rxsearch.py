@@ -47,56 +47,12 @@ def search_all_regex(regexes, window=_DEFAULT_WINDOW, word_window=None):
     Returns:
         A function that takes text and returns a generator of results.
     """
-
-    def _search_all_regex(text, *, include_match=False, ignore_indices=False, suppress_overlaps=False):
-        """
-        Search text.
-
-        Args:
-            text: Text to search.
-            include_match: If True, yield (result, match) tuples.
-            ignore_indices: If True, ignore pre-processors and search the full text.
-            suppress_overlaps: If True, later matches that overlap already-yielded matches are skipped. This is useful
-                when earlier, more-specific regexes should claim a span of text and prevent later regexes from matching
-                inside it.
-        """
-        found_non_unknown = False
-        claimed_spans = SpanTracker()
-
-        for regex, category, *other in regexes:
-            if regex is None:
-                if found_non_unknown:
-                    break
-                continue
-
-            postprocessors, preprocessors = _unpack_regex_args(other)
-
-            if ignore_indices:
-                regions = [(0, len(text))]
-            else:
-                regions = list(_get_search_regions(text, preprocessors))
-
-            for start, end in regions:
-                for m in regex.finditer(text, pos=start, endpos=end):
-                    if suppress_overlaps and claimed_spans.overlaps(m.start(), m.end()):
-                        continue
-
-                    result, result_match = _apply_postprocessors(m, category, postprocessors, text,
-                                                                 window, word_window=word_window)
-
-                    if result is None:
-                        continue
-
-                    if suppress_overlaps:
-                        # IDEA: provide option to suppress just `result_match`?
-                        claimed_spans.add(m.start(), m.end())
-
-                    yield (result, result_match) if include_match else result
-
-                    if _is_non_unknown(result):
-                        found_non_unknown = True
-
-    return _search_all_regex
+    return _search_regex(
+        regexes,
+        window=window,
+        word_window=word_window,
+        extractor=None,
+    )
 
 
 def search_first_regex(regexes, window=_DEFAULT_WINDOW, word_window=None):
@@ -139,17 +95,13 @@ def extract_all_regex_target(
     """
     Extract all values from a regex group, defaulting to the named group 'target'.
 
-    Args:
-        regexes: Iterable of regex definition tuples.
-        window: Context window size for post-processing functions.
-        word_window: Size of context window in terms of words.
-        target: Group name or index to extract.
-        transform: Optional callable used to transform the extracted value.
-        missing: Value returned if the group does not exist. Defaults to SKIP.
-        unmatched: Value returned if the group exists but did not match. Defaults to SKIP.
+    Extraction happens before postprocessors. Postprocessors receive the extracted
+    value as both 'extracted' and 'extracted_value'.
 
-    Returns:
-        A function that takes text and returns a generator of extracted values.
+    Postprocessor behavior:
+        - return SKIP to skip the match
+        - return None to keep the extracted/default value
+        - return any other value to override the extracted/default value
     """
     extractor = _make_extractor(
         target,
@@ -158,11 +110,85 @@ def extract_all_regex_target(
         unmatched=unmatched,
     )
 
-    return search_all_regex(
-        list(_with_postprocessor(regexes, extractor)),
+    return _search_regex(
+        regexes,
         window=window,
         word_window=word_window,
+        extractor=extractor,
     )
+
+
+def _search_regex(regexes, window=_DEFAULT_WINDOW, word_window=None, *, extractor=None):
+    """
+    Shared regex search engine.
+
+    Args:
+        regexes: Iterable of regex definition tuples.
+        window: Context window size for postprocessors.
+        word_window: Size of context window in terms of words.
+        extractor: Optional callable used to extract a default result before
+            postprocessors run.
+
+    Returns:
+        A function that takes text and returns a generator of results.
+    """
+
+    def _run_search(text, *, include_match=False, ignore_indices=False, suppress_overlaps=False):
+        found_non_unknown = False
+        claimed_spans = SpanTracker()
+
+        for regex, category, *other in regexes:
+            if regex is None:
+                if found_non_unknown:
+                    break
+                continue
+
+            postprocessors, preprocessors = _unpack_regex_args(other)
+
+            if ignore_indices:
+                regions = [(0, len(text))]
+            else:
+                regions = list(_get_search_regions(text, preprocessors))
+
+            for start, end in regions:
+                for m in regex.finditer(text, pos=start, endpos=end):
+                    if suppress_overlaps and claimed_spans.overlaps(m.start(), m.end()):
+                        continue
+
+                    contexts = get_contexts(m, text, window, word_window=word_window)
+                    default_result = category
+
+                    if extractor is not None:
+                        extracted = extractor(**contexts)
+
+                        if extracted is SKIP:
+                            continue
+
+                        contexts['extracted'] = extracted
+                        contexts['extracted_value'] = extracted
+
+                        if extracted is not None:
+                            default_result = extracted
+
+                    result, result_match = _apply_postprocessors(
+                        m,
+                        default_result,
+                        postprocessors,
+                        contexts,
+                    )
+
+                    if result is None:
+                        continue
+
+                    if suppress_overlaps:
+                        claimed_spans.add(m.start(), m.end())
+
+                    yield (result, result_match) if include_match else result
+
+                    if _is_non_unknown(result):
+                        found_non_unknown = True
+
+    return _run_search
 
 
 def extract_first_regex_target(
@@ -190,18 +216,27 @@ def extract_first_regex_target(
     Returns:
         A function that takes text and returns a generator yielding at most one extracted value.
     """
-    extractor = _make_extractor(
-        target,
+    search_all = extract_all_regex_target(
+        regexes,
+        window=window,
+        word_window=word_window,
+        target=target,
         transform=transform,
         missing=missing,
         unmatched=unmatched,
     )
 
-    return search_first_regex(
-        list(_with_postprocessor(regexes, extractor)),
-        window=window,
-        word_window=word_window,
-    )
+    def _extract_first_regex(text, *, include_match=False, ignore_indices=False, suppress_overlaps=False):
+        for result in search_all(
+                text,
+                include_match=include_match,
+                ignore_indices=ignore_indices,
+                suppress_overlaps=suppress_overlaps,
+        ):
+            yield result
+            return
+
+    return _extract_first_regex
 
 
 def extract_group(name_or_index='target', *, missing=SKIP, unmatched=SKIP):
@@ -473,15 +508,20 @@ def _get_search_regions(text, preprocessors):
             yield start, end
 
 
-def _apply_postprocessors(m, category, funcs, text, window, *, word_window=None):
+def _apply_postprocessors(m, category, funcs, contexts):
     """
-    Apply post-processors to a match.
+    Apply postprocessors to a match.
+
+    Args:
+        m: Regex match object.
+        category: Default result if no postprocessor overrides.
+        funcs: Postprocessor functions.
+        contexts: Context dictionary passed to postprocessors.
 
     Returns:
-        A tuple of (result, match). If the match should be skipped, returns (None, match).
+        A tuple of (result, match). If the match should be skipped, returns
+        (None, match).
     """
-    contexts = get_contexts(m, text, window, word_window=word_window)
-
     for func in funcs:
         if func is None:
             continue

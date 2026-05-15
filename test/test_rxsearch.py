@@ -691,3 +691,266 @@ def test_span_tracker_merges_adjacent_spans_on_add():
     assert tracker._spans == [(0, 10)]
     assert tracker.overlaps(4, 6) is True
     assert tracker.overlaps(10, 12) is False
+
+
+def test_extract_wrapper_runs_postprocessor_with_extracted_value():
+    seen = {}
+
+    def inspect_extracted(*, extracted, extracted_value, **_):
+        seen['extracted'] = extracted
+        seen['extracted_value'] = extracted_value
+        return None
+
+    regexes = [
+        (
+            re.compile(r'score:\s*(?P<target>\d+)'),
+            None,
+            inspect_extracted,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes, transform=int)
+
+    assert list(extract('score: 10')) == [10]
+    assert seen == {
+        'extracted': 10,
+        'extracted_value': 10,
+    }
+
+
+def test_extract_wrapper_postprocessor_can_skip_using_extracted_value():
+    def skip_low_score(*, extracted, **_):
+        if extracted < 5:
+            return SKIP
+
+        return None
+
+    regexes = [
+        (
+            re.compile(r'score:\s*(?P<target>\d+)'),
+            None,
+            skip_low_score,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes, transform=int)
+
+    assert list(extract('score: 3 score: 8')) == [8]
+
+
+def test_extract_wrapper_postprocessor_can_override_extracted_value():
+    def bucket_score(*, extracted, **_):
+        if extracted >= 8:
+            return 'high'
+
+        return 'low'
+
+    regexes = [
+        (
+            re.compile(r'score:\s*(?P<target>\d+)'),
+            None,
+            bucket_score,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes, transform=int)
+
+    assert list(extract('score: 3 score: 8')) == ['low', 'high']
+
+
+def test_extract_wrapper_missing_skip_does_not_run_postprocessor():
+    calls = []
+
+    def postprocessor(**_):
+        calls.append('called')
+        return None
+
+    regexes = [
+        (
+            re.compile(r'score:\s*(?P<value>\d+)'),
+            None,
+            postprocessor,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes)
+
+    assert list(extract('score: 10')) == []
+    assert calls == []
+
+
+def test_extract_wrapper_missing_none_runs_postprocessor_and_falls_back_to_category():
+    seen = {}
+
+    def inspect_extracted(*, extracted, **_):
+        seen['extracted'] = extracted
+        return None
+
+    regexes = [
+        (
+            re.compile(r'score:\s*(?P<value>\d+)'),
+            'SCORE',
+            inspect_extracted,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes, missing=None)
+
+    assert list(extract('score: 10')) == ['SCORE']
+    assert seen == {'extracted': None}
+
+
+def test_extract_wrapper_missing_none_allows_postprocessor_override():
+    def fallback_value(*, extracted, **_):
+        if extracted is None:
+            return 'NO_SCORE'
+
+        return None
+
+    regexes = [
+        (
+            re.compile(r'score:\s*(?P<value>\d+)'),
+            'SCORE',
+            fallback_value,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes, missing=None)
+
+    assert list(extract('score: 10')) == ['NO_SCORE']
+
+
+def test_extract_wrapper_unmatched_skip_does_not_run_postprocessor():
+    calls = []
+
+    def postprocessor(**_):
+        calls.append('called')
+        return None
+
+    regexes = [
+        (
+            re.compile(r'score(?::\s*(?P<target>\d+))?'),
+            None,
+            postprocessor,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes)
+
+    assert list(extract('score')) == []
+    assert calls == []
+
+
+def test_extract_wrapper_unmatched_none_runs_postprocessor_and_falls_back():
+    seen = {}
+
+    def inspect_extracted(*, extracted, **_):
+        seen['extracted'] = extracted
+        return None
+
+    regexes = [
+        (
+            re.compile(r'score(?::\s*(?P<target>\d+))?'),
+            'SCORE',
+            inspect_extracted,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes, unmatched=None)
+
+    assert list(extract('score')) == ['SCORE']
+    assert seen == {'extracted': None}
+
+
+def test_extract_wrapper_returns_falsey_extracted_value_when_postprocessor_returns_none():
+    def no_override(*, extracted, **_):
+        assert extracted == 0
+        return None
+
+    regexes = [
+        (
+            re.compile(r'score:\s*(?P<target>\d+)'),
+            'SCORE',
+            no_override,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes, transform=int)
+
+    assert list(extract('score: 0')) == [0]
+
+
+def test_search_all_regex_does_not_add_extracted_context_without_extractor():
+    seen = {}
+
+    def inspect_context(**context):
+        seen.update(context)
+        return None
+
+    regexes = [
+        (
+            re.compile(r'score:\s*(?P<target>\d+)'),
+            'SCORE',
+            inspect_context,
+        ),
+    ]
+
+    search = search_all_regex(regexes)
+
+    assert list(search('score: 10')) == ['SCORE']
+    assert 'extracted' not in seen
+    assert 'extracted_value' not in seen
+
+
+def test_extract_wrapper_include_match_returns_extracted_value_and_match():
+    regexes = [
+        (
+            re.compile(r'score:\s*(?P<target>\d+)'),
+            None,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes, transform=int)
+    results = list(extract('score: 10', include_match=True))
+
+    assert len(results) == 1
+
+    value, match = results[0]
+
+    assert value == 10
+    assert match.group() == 'score: 10'
+    assert match.start() == 0
+    assert match.end() == 9
+
+def test_extract_wrapper_supports_suppress_overlaps():
+    regexes = [
+        (
+            re.compile(r'not\s+score:\s*(?P<target>\d+)'),
+            None,
+        ),
+        (
+            re.compile(r'score:\s*(?P<target>\d+)'),
+            None,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes, transform=int)
+
+    assert list(extract('not score: 3 score: 8', suppress_overlaps=True)) == [3, 8]
+
+
+def test_extract_wrapper_suppress_overlaps_skips_inner_extraction():
+    regexes = [
+        (
+            re.compile(r'not\s+score:\s*(?P<target>\d+)'),
+            None,
+        ),
+        (
+            re.compile(r'score:\s*(?P<target>\d+)'),
+            None,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes, transform=int)
+
+    assert list(extract('not score: 3', suppress_overlaps=True)) == [3]

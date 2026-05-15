@@ -433,6 +433,21 @@ extract = extract_all_regex_target(
 If extraction returns `None`, later postprocessors may still run. If no
 postprocessor returns a value, the default value is yielded.
 
+Extraction is handled before postprocessors.
+
+When using `extract_all_regex_target()` or `extract_first_regex_target()`, the
+extracted value is passed to postprocessors as:
+
+- `extracted`
+- `extracted_value`
+
+If a postprocessor returns `None`, the extracted value is returned.
+
+If a postprocessor returns `SKIP`, the match is skipped.
+
+If a postprocessor returns any other value, that value replaces the extracted
+value.
+
 ## Use extraction as a postprocessor
 
 Use `extract_group()` directly in position 2 when you want extraction behavior

@@ -4,6 +4,7 @@ Simplify reading input files by creating an iterating wrapper.
 import csv
 import json
 import random
+import sqlite3
 from pathlib import Path
 
 from loguru import logger
@@ -152,6 +153,36 @@ def _extract_jsonl_file(input_file, encoding, id_label, noteid_label, notedate_l
             if metadata_labels:
                 for src, (dest, func) in metadata_labels.items():
                     metadata[dest] = func(data[src])
+            yield mrn, text, note_id, date, order, metadata
+
+
+def _extract_sqlite_file(input_file, encoding, id_label, noteid_label, notedate_label,
+                         notetext_label, noteorder_label=None, metadata_labels=None,
+                         tablename='notes'):
+    with sqlite3.connect(input_file) as connection:
+        connection.row_factory = sqlite3.Row
+
+        columns = [id_label, noteid_label, notetext_label]
+        if notedate_label:
+            columns.append(notedate_label)
+        if noteorder_label:
+            columns.append(noteorder_label)
+        if metadata_labels:
+            columns.extend(metadata_labels.keys())
+
+        column_sql = ', '.join(f'"{column}"' for column in columns)
+        query = f'SELECT {column_sql} FROM "{tablename}"'
+
+        for row in connection.execute(query):
+            text = row[notetext_label]
+            mrn = row[id_label]
+            date = row[notedate_label] if notedate_label and notedate_label in row.keys() else ''
+            note_id = row[noteid_label]
+            order = row[noteorder_label] if noteorder_label and noteorder_label in row.keys() else ''
+            metadata = {}
+            if metadata_labels:
+                for src, (dest, func) in metadata_labels.items():
+                    metadata[dest] = func(row[src])
             yield mrn, text, note_id, date, order, metadata
 
 
