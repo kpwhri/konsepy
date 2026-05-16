@@ -4,8 +4,16 @@ import konsepy.train_on_bio_dataset as train_mod
 
 
 def test_compute_metrics_requires_evaluate(monkeypatch):
+    monkeypatch.setattr(train_mod, 'np', None)
     monkeypatch.setattr(train_mod, 'evaluate', None)
     with pytest.raises(ImportError, match='requires evaluate'):
+        train_mod.compute_metrics(([], []), {})
+
+
+def test_compute_metrics_requires_numpy(monkeypatch):
+    monkeypatch.setattr(train_mod, 'evaluate', object())
+    monkeypatch.setattr(train_mod, 'np', None)
+    with pytest.raises(ImportError, match='requires numpy'):
         train_mod.compute_metrics(([], []), {})
 
 

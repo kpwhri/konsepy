@@ -22,7 +22,10 @@ try:
     from datasets import DatasetDict
 except ImportError:  # pragma: no cover - optional dependency
     DatasetDict = None
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover - optional dependency
+    np = None
 
 
 def tokenize_adjust_labels(tokenizer, label2id):
@@ -65,6 +68,8 @@ def tokenize_adjust_labels(tokenizer, label2id):
 def compute_metrics(p, id2label):
     if evaluate is None:
         raise ImportError('train_on_bio_dataset requires evaluate to be installed.')
+    if np is None:
+        raise ImportError('train_on_bio_dataset requires numpy to be installed.')
     metric = evaluate.load('seqeval')
     predictions, labels = p
     predictions = np.argmax(predictions, axis=2)
