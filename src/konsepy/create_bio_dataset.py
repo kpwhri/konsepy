@@ -4,9 +4,9 @@ import json
 from pathlib import Path
 
 try:
-    from datasets import Dataset, Features, Sequence, Value
+    from datasets import Dataset, DatasetDict, Features, Sequence, Value
 except ImportError:
-    Dataset, Features, Sequence, Value = None, None, None, None
+    Dataset, DatasetDict, Features, Sequence, Value = None, None, None, None, None
 from konsepy.cli import clean_args
 from loguru import logger
 
@@ -48,7 +48,12 @@ def create_bio_dataset(path: Path, outpath: Path, test_size=0.1, validation_size
             tokens = []
             ner_tags = []
             spans = get_spans(data['results'])
-            span_start, span_end, span_tag, span_is_middle = next(spans)
+            try:
+                span_start, span_end, span_tag, span_is_middle = next(spans)
+            except StopIteration:
+                span_start, span_end = 100_000, 100_000
+                span_tag = None
+                span_is_middle = False
 
             curr_word = []
             for i, letter in enumerate(data['text']):
@@ -98,15 +103,33 @@ def create_bio_dataset(path: Path, outpath: Path, test_size=0.1, validation_size
         'note_ids': all_note_ids,
     }, features=features)
 
-    res = ds.train_test_split(validation_size, shuffle=True)
-    # split the remaining data into train/test, keeping the requested overall ratios
-    if test_size:
-        remaining_ratio = 1 - validation_size
-        test_ratio = test_size / remaining_ratio
+    num_rows = len(ds)
+    if num_rows < 2:
+        ds = DatasetDict(
+            {
+                'train': ds,
+                'test': ds.select([]),
+                'validation': ds.select([]),
+            }
+        )
     else:
-        test_ratio = test_size
-    ds = res['train'].train_test_split(test_size=test_ratio, shuffle=True)
-    ds['validation'] = res['test']
+        if validation_size:
+            res = ds.train_test_split(validation_size, shuffle=True)
+        else:
+            res = DatasetDict({'train': ds, 'test': ds.select([])})
+
+        # split the remaining data into train/test, keeping the requested overall ratios
+        if test_size:
+            remaining_ratio = 1 - validation_size if validation_size else 1
+            test_ratio = test_size / remaining_ratio if remaining_ratio else 0
+        else:
+            test_ratio = test_size
+
+        if test_ratio and len(res['train']) >= 2:
+            ds = res['train'].train_test_split(test_size=test_ratio, shuffle=True)
+        else:
+            ds = DatasetDict({'train': res['train'], 'test': res['train'].select([])})
+        ds['validation'] = res['test']
     ds.save_to_disk(outpath / f'{path.stem}.{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.dataset')
 
 

@@ -5,6 +5,7 @@ import csv
 import json
 import random
 import sqlite3
+from collections import defaultdict
 from pathlib import Path
 
 from loguru import logger
@@ -192,8 +193,10 @@ def _extract_sqlite_file(input_file, encoding, id_label, noteid_label, notedate_
 
 def output_results(outdir, *, not_found_text=None,
                    note_counter=None, cat_counter_mrns=None,
-                   category_enums=None, note_to_cat=None, mrn_to_cat=None):
-    categories = [str(e) for category_enum in category_enums for e in category_enum]
+                   category_enums=None, note_to_cat=None, mrn_to_cat=None,
+                   extraction_rows=None):
+    categories = [e for category_enum in category_enums for e in category_enum]
+    category_names = [str(e) for e in categories]
     if not_found_text is not None:
         with open(outdir / 'snippets.csv', 'w', newline='') as out:
             writer = csv.writer(out)
@@ -205,17 +208,155 @@ def output_results(outdir, *, not_found_text=None,
         writer = csv.writer(out)
         writer.writerow(['category', 'note_count', 'mrn_count'])
         for cat in categories:
-            writer.writerow([cat, note_counter[cat], len(cat_counter_mrns[cat])])
+            writer.writerow(
+                [
+                    str(cat),
+                    _get_counter_value(note_counter, cat),
+                    _get_counter_set_size(cat_counter_mrns, cat),
+                ]
+            )
 
     with open(outdir / 'mrn_category_counts.csv', 'w', newline='') as out:
-        writer = csv.DictWriter(out, ['mrn'] + categories)
+        writer = csv.DictWriter(out, ['mrn'] + category_names)
         writer.writeheader()
         for mrn, note_counter in mrn_to_cat.items():
-            writer.writerow({'mrn': mrn} | dict(note_counter))
+            writer.writerow({'mrn': mrn} | _stringify_counter(note_counter))
 
     with open(outdir / 'notes_category_counts.csv', 'w', newline='') as out:
-        writer = csv.DictWriter(out, ['mrn', 'note_id'] + categories)
+        writer = csv.DictWriter(out, ['mrn', 'note_id'] + category_names)
         writer.writeheader()
         for (mrn, note), note_counter in note_to_cat.items():
-            writer.writerow({'mrn': mrn, 'note_id': note} | dict(note_counter))
+            writer.writerow({'mrn': mrn, 'note_id': note} | _stringify_counter(note_counter))
+    if extraction_rows:
+        output_extraction_results(outdir, extraction_rows)
     logger.info(f'Unique MRNs with any category: {len(mrn_to_cat):,}')
+
+
+def output_extraction_results(outdir, extraction_rows):
+    """Write extraction-specific output files."""
+    _output_extracted_values(outdir, extraction_rows)
+    _output_extracted_max_per_note(outdir, extraction_rows)
+    _output_extracted_max_per_mrn(outdir, extraction_rows)
+    _output_extracted_sum_of_group_maxima(outdir, extraction_rows)
+
+
+def _output_extracted_values(outdir, extraction_rows):
+    with open(outdir / 'extracted_values.csv', 'w', newline='') as out:
+        fieldnames = ['mrn', 'note_id', 'category', 'value', 'group']
+        writer = csv.DictWriter(out, fieldnames)
+        writer.writeheader()
+        writer.writerows(extraction_rows)
+
+
+def _output_extracted_max_per_note(outdir, extraction_rows):
+    max_by_note = {}
+
+    for row in extraction_rows:
+        value = _coerce_number(row['value'])
+        if value is None:
+            continue
+
+        key = (row['mrn'], row['note_id'], row['category'])
+        if key not in max_by_note or value > max_by_note[key]:
+            max_by_note[key] = value
+
+    with open(outdir / 'extracted_max_per_note.csv', 'w', newline='') as out:
+        writer = csv.DictWriter(out, ['mrn', 'note_id', 'category', 'max_value'])
+        writer.writeheader()
+
+        for (mrn, note_id, category), max_value in sorted(max_by_note.items()):
+            writer.writerow(
+                {
+                    'mrn': mrn,
+                    'note_id': note_id,
+                    'category': category,
+                    'max_value': max_value,
+                }
+            )
+
+
+def _output_extracted_max_per_mrn(outdir, extraction_rows):
+    max_by_mrn = {}
+
+    for row in extraction_rows:
+        value = _coerce_number(row['value'])
+        if value is None:
+            continue
+
+        key = (row['mrn'], row['category'])
+        if key not in max_by_mrn or value > max_by_mrn[key]:
+            max_by_mrn[key] = value
+
+    with open(outdir / 'extracted_max_per_mrn.csv', 'w', newline='') as out:
+        writer = csv.DictWriter(out, ['mrn', 'category', 'max_value'])
+        writer.writeheader()
+
+        for (mrn, category), max_value in sorted(max_by_mrn.items()):
+            writer.writerow(
+                {
+                    'mrn': mrn,
+                    'category': category,
+                    'max_value': max_value,
+                }
+            )
+
+
+def _output_extracted_sum_of_group_maxima(outdir, extraction_rows):
+    max_by_group = {}
+
+    for row in extraction_rows:
+        value = _coerce_number(row['value'])
+        group = row.get('group')
+
+        if value is None or group is None:
+            continue
+
+        key = (row['mrn'], row['category'], group)
+        if key not in max_by_group or value > max_by_group[key]:
+            max_by_group[key] = value
+
+    sum_by_mrn = defaultdict(int)
+
+    for (mrn, category, _group), max_value in max_by_group.items():
+        sum_by_mrn[(mrn, category)] += max_value
+
+    with open(outdir / 'extracted_sum_of_group_maxima.csv', 'w', newline='') as out:
+        writer = csv.DictWriter(out, ['mrn', 'category', 'sum_of_group_maxima'])
+        writer.writeheader()
+
+        for (mrn, category), total in sorted(sum_by_mrn.items()):
+            writer.writerow(
+                {
+                    'mrn': mrn,
+                    'category': category,
+                    'sum_of_group_maxima': total,
+                }
+            )
+
+
+def _coerce_number(value):
+    if isinstance(value, (int, float)):
+        return value
+
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _stringify_counter(counter):
+    return {str(key): value for key, value in counter.items()}
+
+
+def _get_counter_value(counter, key):
+    if key in counter:
+        return counter[key]
+    key_name = str(key)
+    return counter.get(key_name, 0)
+
+
+def _get_counter_set_size(counter, key):
+    if key in counter:
+        return len(counter[key])
+    key_name = str(key)
+    return len(counter.get(key_name, set()))

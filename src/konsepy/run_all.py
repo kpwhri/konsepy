@@ -7,9 +7,9 @@ from loguru import logger
 
 from konsepy.cli import add_outdir_and_infiles, add_run_all_args, clean_args
 from konsepy.constants import NOTEDATE_LABEL, ID_LABEL, NOTEID_LABEL, NOTETEXT_LABEL
-from konsepy.importer import get_all_concepts
 from konsepy.regex import extract_categories
-from konsepy.textio import iterate_csv_file, output_results
+from konsepy.results import get_result_label
+from konsepy.textio import output_results
 
 from konsepy.engine import ProcessingEngine
 
@@ -34,6 +34,7 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
     noteid_to_cat = defaultdict(Counter)
     mrn_to_cat = defaultdict(Counter)
     unique_mrns = set()
+    extraction_rows = []
 
     engine = ProcessingEngine(
         input_files, package_name, encoding=encoding, id_label=id_label,
@@ -46,6 +47,7 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
     with open(curr_outdir / 'output.jsonl', 'w') as out:
         def callback(studyid, note_id, note_date, text, metadata, concept, categories, matches):
             if categories:
+                output_categories = [str(get_result_label(category)) for category in categories]
                 out.write(json.dumps({
                     'studyid': studyid,
                     'note_id': note_id,
@@ -53,14 +55,14 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
                     'text': text if include_text_output else None,
                     'concept': concept.name,
                     'matches': [m.group() for m in matches] if matches else None,
-                    'categories': categories,
+                    'categories': output_categories,
                 }) + '\n')
             if not incremental_output_only:
                 extract_categories(
                     studyid, note_id, text, concept.run_func, categories=categories,
                     cat_counter_mrns=cat_counter_mrns, cat_counter_notes=cat_counter_notes,
                     mrn_to_cat=mrn_to_cat, noteid_to_cat=noteid_to_cat,
-                    unique_mrns=unique_mrns
+                    unique_mrns=unique_mrns, extraction_rows=extraction_rows
                 )
 
         engine.run(callback)
@@ -70,7 +72,8 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
         output_results(curr_outdir, note_counter=cat_counter_notes,
                        cat_counter_mrns=cat_counter_mrns,
                        category_enums=[category_enum for c in engine.concepts for category_enum in c.category_enums],
-                       note_to_cat=noteid_to_cat, mrn_to_cat=mrn_to_cat)
+                       note_to_cat=noteid_to_cat, mrn_to_cat=mrn_to_cat,
+                       extraction_rows=extraction_rows)
     return curr_outdir
 
 

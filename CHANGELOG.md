@@ -22,6 +22,7 @@ Types of changes:
 
 * Full pipeline of build bio corpus, train, and predict; e2e tests to ensure pipeline works
 * Add subword merging + test
+* Added labeled extraction results with separate extraction output (to csv)
 
 ## [0.5.1]
 

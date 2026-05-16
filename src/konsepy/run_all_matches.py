@@ -6,6 +6,7 @@ from loguru import logger
 from konsepy.constants import NOTEDATE_LABEL, ID_LABEL, NOTEID_LABEL, NOTETEXT_LABEL
 from konsepy.context.contexts import get_contexts
 from konsepy.engine import ProcessingEngine
+from konsepy.results import get_result_label
 
 
 def run_all_matches(input_files, outdir: pathlib.Path, package_name: str, *,
@@ -41,7 +42,8 @@ def run_all_matches(input_files, outdir: pathlib.Path, package_name: str, *,
 
             for category, m in zip(categories, matches):
                 # serialize category cleanly
-                cat_name = category.name if hasattr(category, 'name') else str(category)
+                label = get_result_label(category)
+                cat_name = str(label)
 
                 contexts = get_contexts(m, text, window=window, word_window=word_window)
                 row = {

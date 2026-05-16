@@ -503,6 +503,47 @@ Output:
 [10]
 ```
 
+## Labeled extraction results
+
+Extraction concepts can return an enum label plus an extracted value. This lets
+classification and extraction concepts appear similarly in category count files,
+while still preserving extracted values in separate extraction files.
+
+```python
+import enum
+import re
+
+from konsepy.results import ExtractionResult
+from konsepy.rxsearch import extract_all_regex_target
+
+
+class ScoreCategory(enum.Enum):
+    SCORE = 1
+    UNKNOWN = -1
+
+
+def label_score(*, extracted, **_):
+    return ExtractionResult(
+        label=ScoreCategory.SCORE,
+        value=extracted,
+    )
+
+
+REGEXES = [
+    (
+        re.compile(r'\bscore\s*:\s*(?P<target>\d+)\b', re.I),
+        None,
+        label_score,
+    ),
+]
+
+
+RUN_REGEXES_FUNC = extract_all_regex_target(REGEXES, transform=int)
+```
+
+The standard category output counts `ScoreCategory.SCORE`. Extraction-specific
+outputs store the numeric value.
+
 ## Prevent overlapping duplicate matches
 
 Pass `suppress_overlaps=True` to let earlier matches claim spans of text.

@@ -7,12 +7,15 @@ from loguru import logger
 from konsepy.cli import add_outdir_and_infiles, add_run_all_args, clean_args, clean_metadata_labels
 from konsepy.constants import NOTEDATE_LABEL, ID_LABEL, NOTEID_LABEL, NOTETEXT_LABEL
 from konsepy.engine import ProcessingEngine
+from konsepy.results import get_result_label
 
 
 def _retain_record(concept, category, target_categories, target_concepts):
+    category_label = get_result_label(category)
+    category_name = str(category_label)
     if not target_concepts and not target_categories:
         return True
-    if target_categories and category in target_categories:
+    if target_categories and category_name in target_categories:
         return True
     if target_concepts and concept.name in target_concepts:
         return True
@@ -70,7 +73,8 @@ def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
                 if _retain_record(concept, category, target_categories, target_concepts):
                     output_length[0] += 1
 
-                    category = category.name if hasattr(category, 'name') else str(category)
+                    category_label = get_result_label(category)
+                    category = str(category_label)
 
                     target = None
                     target_start_index = None

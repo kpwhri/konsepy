@@ -3,8 +3,7 @@ import re
 from collections import Counter, defaultdict
 
 from konsepy.constants import NOTEDATE_LABEL, ID_LABEL, NOTEID_LABEL, NOTETEXT_LABEL
-from konsepy.context.contexts import get_contexts
-from konsepy.importer import get_all_concepts
+from konsepy.results import ExtractionResult, get_result_label
 from konsepy.textio import iterate_csv_file, output_results
 from loguru import logger
 
@@ -23,6 +22,7 @@ def run_regex_on_files(input_files, regex_func, package_name=None, *, start_afte
     mrn_to_cat = defaultdict(Counter)
     unique_mrns = set()
     not_found_text = Counter()
+    extraction_rows = []
     if require_regex:
         require_regex = re.compile(require_regex, re.I)
 
@@ -43,23 +43,37 @@ def run_regex_on_files(input_files, regex_func, package_name=None, *, start_afte
             cat_counter_mrns=cat_counter_mrns, cat_counter_notes=cat_counter_notes,
             mrn_to_cat=mrn_to_cat, require_regex=require_regex,
             not_found_text=not_found_text, noteid_to_cat=noteid_to_cat,
-            unique_mrns=unique_mrns, window_size=window_size
+            unique_mrns=unique_mrns, window_size=window_size,
+            extraction_rows=extraction_rows,
         )
     logger.info(f'Finished. Total records: {count:,}  ({datetime.datetime.now()})')
-    return cat_counter_notes, cat_counter_mrns, not_found_text, mrn_to_cat, noteid_to_cat
+    return cat_counter_notes, cat_counter_mrns, not_found_text, mrn_to_cat, noteid_to_cat, extraction_rows
 
 
 def extract_categories(mrn, note_id, text, regex_func, *, categories=None,
                        cat_counter_mrns=None, cat_counter_notes=None, mrn_to_cat=None,
                        not_found_text=None, noteid_to_cat=None,
-                       require_regex=None, unique_mrns=None, window_size=50):
+                       require_regex=None, unique_mrns=None, window_size=50,
+                       extraction_rows=None):
     if categories is None:  # don't re-run when empty list
         categories = list(regex_func(text, categories_only=True))
     for category in categories:
-        mrn_to_cat[mrn][category] += 1
-        noteid_to_cat[(mrn, note_id)][category] += 1
-        cat_counter_notes[category] += 1
-        cat_counter_mrns[category].add(mrn)
+        label = get_result_label(category)
+        mrn_to_cat[mrn][label] += 1
+        noteid_to_cat[(mrn, note_id)][label] += 1
+        cat_counter_notes[label] += 1
+        cat_counter_mrns[label].add(mrn)
+
+        if isinstance(category, ExtractionResult) and extraction_rows is not None:
+            extraction_rows.append(
+                {
+                    'mrn': mrn,
+                    'note_id': note_id,
+                    'category': str(category.label),
+                    'value': category.value,
+                    'group': category.group,
+                }
+            )
     if categories:
         unique_mrns.add(mrn)
     if not categories and not_found_text:
@@ -96,7 +110,7 @@ def run_regex_and_output(package_name, input_files, outdir, *concepts,
         curr_outdir.mkdir(parents=True)
         logger.add(curr_outdir / f'{iconcept.name}_{dt}.log')
 
-        note_counter, cat_counter_mrns, not_found_text, mrn_to_cat, note_to_cat = run_regex_on_files(
+        note_counter, cat_counter_mrns, not_found_text, mrn_to_cat, note_to_cat, extraction_rows = run_regex_on_files(
             input_files, iconcept.run_func, package_name=package_name,
             start_after=start_after, stop_after=stop_after, require_regex=require_regex,
             window_size=window_size,
@@ -107,4 +121,5 @@ def run_regex_and_output(package_name, input_files, outdir, *concepts,
         )
         output_results(curr_outdir, not_found_text=not_found_text, note_counter=note_counter,
                        cat_counter_mrns=cat_counter_mrns, category_enums=iconcept.category_enums,
-                       note_to_cat=note_to_cat, mrn_to_cat=mrn_to_cat)
+                       note_to_cat=note_to_cat, mrn_to_cat=mrn_to_cat,
+                       extraction_rows=extraction_rows)

@@ -69,12 +69,14 @@ def search_first_regex(regexes, window=_DEFAULT_WINDOW, word_window=None):
     """
     search_all = search_all_regex(regexes, window=window, word_window=word_window)
 
-    def _search_first_regex(text, *, include_match=False, ignore_indices=False, suppress_overlaps=False):
+    def _search_first_regex(text, *, include_match=False, ignore_indices=False,
+                            suppress_overlaps=False, categories_only=False):
         for result in search_all(
                 text,
                 include_match=include_match,
                 ignore_indices=ignore_indices,
                 suppress_overlaps=suppress_overlaps,
+                categories_only=categories_only,
         ):
             yield result
             return
@@ -133,7 +135,8 @@ def _search_regex(regexes, window=_DEFAULT_WINDOW, word_window=None, *, extracto
         A function that takes text and returns a generator of results.
     """
 
-    def _run_search(text, *, include_match=False, ignore_indices=False, suppress_overlaps=False):
+    def _run_search(text, *, include_match=False, ignore_indices=False,
+                    suppress_overlaps=False, categories_only=False):
         found_non_unknown = False
         claimed_spans = SpanTracker()
 
@@ -226,12 +229,14 @@ def extract_first_regex_target(
         unmatched=unmatched,
     )
 
-    def _extract_first_regex(text, *, include_match=False, ignore_indices=False, suppress_overlaps=False):
+    def _extract_first_regex(text, *, include_match=False, ignore_indices=False,
+                             suppress_overlaps=False, categories_only=False):
         for result in search_all(
                 text,
                 include_match=include_match,
                 ignore_indices=ignore_indices,
                 suppress_overlaps=suppress_overlaps,
+                categories_only=categories_only,
         ):
             yield result
             return
@@ -308,12 +313,14 @@ def get_all_regex_by_index(regexes, window=_DEFAULT_WINDOW, word_window=None):
     """
     search_all = search_all_regex(regexes, window=window, word_window=word_window)
 
-    def _get_all_regex_by_index(text, *, ignore_indices=False, suppress_overlaps=False):
+    def _get_all_regex_by_index(text, *, ignore_indices=False,
+                                suppress_overlaps=False, categories_only=False):
         for result, match in search_all(
                 text,
                 include_match=True,
                 ignore_indices=ignore_indices,
                 suppress_overlaps=suppress_overlaps,
+                categories_only=categories_only,
         ):
             yield result, match.group(), match.start(), match.end()
 
@@ -343,12 +350,14 @@ def search_and_replace_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=N
 
     search_all = search_all_regex(regexes, window=window, word_window=word_window)
 
-    def _search_and_replace_regex(text, *, include_match=False, ignore_indices=False):
+    def _search_and_replace_regex(text, *, include_match=False,
+                                  ignore_indices=False, categories_only=False):
         yield from search_all(
             text,
             include_match=include_match,
             ignore_indices=ignore_indices,
             suppress_overlaps=True,
+            categories_only=categories_only,
         )
 
     return _search_and_replace_regex
