@@ -1,7 +1,9 @@
 from bisect import bisect_left
+from enum import Enum
 from warnings import warn
 
 from konsepy.context.contexts import get_contexts
+from konsepy.results import ExtractionResult
 
 _DEFAULT_WINDOW = 30
 
@@ -171,7 +173,10 @@ def _search_regex(regexes, window=_DEFAULT_WINDOW, word_window=None, *, extracto
                         contexts['extracted_value'] = extracted
 
                         if extracted is not None:
-                            default_result = extracted
+                            if isinstance(category, Enum):
+                                default_result = ExtractionResult(label=category, value=extracted)
+                            else:
+                                default_result = extracted
 
                     result, result_match = _apply_postprocessors(
                         m,

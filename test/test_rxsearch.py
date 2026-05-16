@@ -441,7 +441,7 @@ def test_extract_group_as_preserves_falsey_transformed_value():
 
 def test_extract_all_regex_target_extracts_all_targets():
     regexes = [
-        (re.compile(r'hero:\s*(?P<target>\w+)'), Category.HERO),
+        (re.compile(r'hero:\s*(?P<target>\w+)'), None),
     ]
 
     extract = extract_all_regex_target(regexes)
@@ -451,7 +451,7 @@ def test_extract_all_regex_target_extracts_all_targets():
 
 def test_extract_first_regex_target_extracts_only_first_target():
     regexes = [
-        (re.compile(r'hero:\s*(?P<target>\w+)'), Category.HERO),
+        (re.compile(r'hero:\s*(?P<target>\w+)'), None),
     ]
 
     extract = extract_first_regex_target(regexes)
@@ -461,7 +461,7 @@ def test_extract_first_regex_target_extracts_only_first_target():
 
 def test_extract_all_regex_target_supports_transform():
     regexes = [
-        (re.compile(r'number:\s*(?P<target>\d+)'), Category.NUMBER),
+        (re.compile(r'number:\s*(?P<target>\d+)'), None),
     ]
 
     extract = extract_all_regex_target(regexes, transform=int)
@@ -471,7 +471,7 @@ def test_extract_all_regex_target_supports_transform():
 
 def test_extract_all_regex_target_supports_custom_target_name():
     regexes = [
-        (re.compile(r'hero:\s*(?P<name>\w+)'), Category.HERO),
+        (re.compile(r'hero:\s*(?P<name>\w+)'), None),
     ]
 
     extract = extract_all_regex_target(regexes, target='name')
@@ -520,7 +520,7 @@ def test_extract_wrapper_preserves_preprocessors():
         yield start, len(text)
 
     regexes = [
-        (re.compile(r'hero:\s*(?P<target>\w+)'), Category.HERO, None, second_sentence),
+        (re.compile(r'hero:\s*(?P<target>\w+)'), None, None, second_sentence),
     ]
 
     extract = extract_all_regex_target(regexes)

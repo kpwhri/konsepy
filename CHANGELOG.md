@@ -18,6 +18,12 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.5.8]
+
+### Fixed
+
+* Don't require ExtractionResult to be specified, but concept can just be supplied as second argument to run_regexes_func.
+
 ## [0.5.7]
 
 ### Added
@@ -217,7 +223,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.5.7...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.5.8...HEAD
+
+[0.5.8]: https://github.com/kpwhri/konsepy/compare/v0.5.7...v0.5.8
 
 [0.5.7]: https://github.com/kpwhri/konsepy/compare/v0.5.1...v0.5.7
 

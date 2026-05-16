@@ -507,7 +507,11 @@ Output:
 
 Extraction concepts can return an enum label plus an extracted value. This lets
 classification and extraction concepts appear similarly in category count files,
-while still preserving extracted values in separate extraction files.
+while still preserving extracted values in separate extraction files. The enum
+label is optional: if you omit it, extraction returns raw values only. If you
+include it (either via a postprocessor or by setting the category position in
+`REGEXES`), the system automatically wraps extracted values in
+`ExtractionResult`.
 
 ```python
 import enum
@@ -532,8 +536,7 @@ def label_score(*, extracted, **_):
 REGEXES = [
     (
         re.compile(r'\bscore\s*:\s*(?P<target>\d+)\b', re.I),
-        None,
-        label_score,
+        ScoreCategory.SCORE,
     ),
 ]
 

@@ -172,3 +172,55 @@ def test_run_all_matches_outputs_label_string(tmp_path):
 
     assert len(rows) == 3
     assert all(row['category'] == 'ScoreCategory.SCORE' for row in rows)
+
+
+def test_extract_all_regex_target_wraps_enum_label():
+    import enum
+    import re
+
+    class ScoreCategory(enum.Enum):
+        SCORE = 1
+
+    regexes = [
+        (
+            re.compile(r'\bscore\s*:\s*(?P<target>\d+)\b', re.I),
+            ScoreCategory.SCORE,
+        ),
+    ]
+
+    search = extract_all_regex_target(regexes, transform=int)
+    results = list(search('score: 10'))
+
+    assert len(results) == 1
+    result = results[0]
+    assert isinstance(result, ExtractionResult)
+    assert result.label == ScoreCategory.SCORE
+    assert result.value == 10
+
+
+def test_extract_all_regex_target_allows_postprocessor_override():
+    import enum
+    import re
+
+    class ScoreCategory(enum.Enum):
+        SCORE = 1
+
+    def override(*, extracted, **_):
+        return ExtractionResult(label=ScoreCategory.SCORE, value=extracted * 2)
+
+    regexes = [
+        (
+            re.compile(r'\bscore\s*:\s*(?P<target>\d+)\b', re.I),
+            ScoreCategory.SCORE,
+            override,
+        ),
+    ]
+
+    search = extract_all_regex_target(regexes, transform=int)
+    results = list(search('score: 10'))
+
+    assert len(results) == 1
+    result = results[0]
+    assert isinstance(result, ExtractionResult)
+    assert result.label == ScoreCategory.SCORE
+    assert result.value == 20
