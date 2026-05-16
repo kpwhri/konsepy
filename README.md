@@ -702,6 +702,18 @@ konsepy bio-tag --package-name my_nlp_package --input-files data.csv --outdir bi
 For more detailed documentation and a template,
 see [konsepy_nlp_template](https://github.com/kpwhri/konsepy_nlp_template).
 
+## Testing
+
+```bash
+# end-to-end BIO train/predict test (requires a local model path)
+python -m pytest test/test_train_predict_e2e.py -k test_train_predict_e2e --bio-model-path /my/huggingface/models/roberta-base
+```
+
+**Note**: By default, prediction output merges adjacent subword spans that share the same
+entity label into a single result to produce word-level captures. To preserve
+raw token-level spans for debugging, pass `--no-merge-subwords` to the
+prediction CLI.
+
 ## Roadmap
 
 * Change labels to some metadata object to allow more diverse input sources and run info

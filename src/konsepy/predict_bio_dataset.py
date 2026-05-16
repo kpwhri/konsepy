@@ -32,7 +32,7 @@ def _strip_bio_prefix(label):
     return label
 
 
-def _iter_spans_from_labels_and_offsets(labels, offsets):
+def _iter_spans_from_labels_and_offsets(labels, offsets, *, merge_subwords=True):
     current = None
 
     for label, offset in zip(labels, offsets):
@@ -59,7 +59,7 @@ def _iter_spans_from_labels_and_offsets(labels, offsets):
             }
             continue
 
-        if is_begin or current['domain'] != entity or start > current['end']:
+        if current['domain'] != entity or start > current['end'] or (is_begin and not merge_subwords):
             yield current
             current = {
                 'domain': entity,
@@ -73,7 +73,16 @@ def _iter_spans_from_labels_and_offsets(labels, offsets):
         yield current
 
 
-def _iter_predicted_spans(text, tokenizer, model, id2label, *, max_length=512, device='cpu'):
+def _iter_predicted_spans(
+        text,
+        tokenizer,
+        model,
+        id2label,
+        *,
+        max_length=512,
+        device='cpu',
+        merge_subwords=True,
+):
     encoded = tokenizer(
         text,
         return_offsets_mapping=True,
@@ -91,7 +100,11 @@ def _iter_predicted_spans(text, tokenizer, model, id2label, *, max_length=512, d
     predicted_ids = logits.argmax(dim=-1).tolist()
     labels = [id2label[label_id] for label_id in predicted_ids]
 
-    yield from _iter_spans_from_labels_and_offsets(labels, offset_mapping)
+    yield from _iter_spans_from_labels_and_offsets(
+        labels,
+        offset_mapping,
+        merge_subwords=merge_subwords,
+    )
 
 
 def predict_bio_dataset(
@@ -110,6 +123,7 @@ def predict_bio_dataset(
         metadata_labels=None,
         max_length=512,
         device=None,
+        merge_subwords=True,
 ):
     """Run a trained BIO token-classification model over raw input files."""
     outdir.mkdir(parents=True, exist_ok=True)
@@ -151,6 +165,7 @@ def predict_bio_dataset(
                     id2label,
                     max_length=max_length,
                     device=device,
+                    merge_subwords=merge_subwords,
             ):
                 start = span['start']
                 end = span['end']
@@ -192,8 +207,15 @@ def predict_bio_dataset_args():
     parser.add_argument('--noteorder-label')
     parser.add_argument('--max-length', type=int, default=512)
     parser.add_argument('--device', help='Device to use, e.g. cpu, cuda, cuda:0.')
+    parser.add_argument(
+        '--no-merge-subwords',
+        action='store_true',
+        help='Preserve raw token-level spans instead of merging adjacent subword pieces.',
+    )
 
-    predict_bio_dataset(**clean_args(vars(parser.parse_args())))
+    args = clean_args(vars(parser.parse_args()))
+    args['merge_subwords'] = not args.pop('no_merge_subwords')
+    predict_bio_dataset(**args)
 
 
 if __name__ == '__main__':

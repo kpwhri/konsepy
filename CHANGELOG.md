@@ -21,6 +21,7 @@ Types of changes:
 ### Added
 
 * Full pipeline of build bio corpus, train, and predict; e2e tests to ensure pipeline works
+* Add subword merging + test
 
 ## [0.5.1]
 

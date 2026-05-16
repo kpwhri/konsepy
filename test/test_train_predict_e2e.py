@@ -118,4 +118,14 @@ def test_create_train_predict_bio_dataset_e2e(tmp_path, bio_model_path):
         assert 0 <= result['start'] <= result['end'] <= len(TEXT)
         assert result['capture'] == TEXT[result['start']:result['end']]
 
+    results = row['results']
+    # ensure near results have all been merged
+    # this handles bpe models like roberta-base
+    for index in range(len(results) - 1):
+        current = results[index]
+        nxt = results[index + 1]
+        assert not (
+            current['domain'] == nxt['domain'] and current['end'] >= nxt['start']
+        )
+
     assert any(result['domain'] == 'hero' for result in row['results'])
