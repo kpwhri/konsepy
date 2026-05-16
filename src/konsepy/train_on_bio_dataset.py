@@ -5,10 +5,23 @@ from pathlib import Path
 
 from loguru import logger
 
-from transformers import AutoTokenizer, DataCollatorForTokenClassification, AutoModelForTokenClassification, \
-    TrainingArguments, Trainer
-import evaluate
-from datasets import DatasetDict
+try:
+    from transformers import AutoTokenizer, DataCollatorForTokenClassification, AutoModelForTokenClassification, \
+        TrainingArguments, Trainer
+except ImportError:  # pragma: no cover - optional dependency
+    AutoTokenizer = None
+    DataCollatorForTokenClassification = None
+    AutoModelForTokenClassification = None
+    TrainingArguments = None
+    Trainer = None
+try:
+    import evaluate
+except ImportError:  # pragma: no cover - optional dependency
+    evaluate = None
+try:
+    from datasets import DatasetDict
+except ImportError:  # pragma: no cover - optional dependency
+    DatasetDict = None
 import numpy as np
 
 
@@ -50,6 +63,8 @@ def tokenize_adjust_labels(tokenizer, label2id):
 
 
 def compute_metrics(p, id2label):
+    if evaluate is None:
+        raise ImportError('train_on_bio_dataset requires evaluate to be installed.')
     metric = evaluate.load('seqeval')
     predictions, labels = p
     predictions = np.argmax(predictions, axis=2)
@@ -79,6 +94,10 @@ def compute_metrics(p, id2label):
 
 def train_on_bio_dataset(dataset_path: Path, outpath: Path, run_name: str, pretrained_tokenizer: str = None,
                          pretrained_model: str = 'emilyalsentzer/Bio_ClinicalBERT', **params):
+    if AutoTokenizer is None or TrainingArguments is None or Trainer is None:
+        raise ImportError('train_on_bio_dataset requires transformers to be installed.')
+    if DatasetDict is None:
+        raise ImportError('train_on_bio_dataset requires datasets to be installed.')
     dataset = DatasetDict.load_from_disk(dataset_path)
     tagset = set([x for doc in dataset['train']['ner_tags'] for x in doc])
     label2id = {x: i for i, x in enumerate(tagset)}
