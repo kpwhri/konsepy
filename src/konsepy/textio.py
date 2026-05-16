@@ -51,6 +51,10 @@ def iterate_csv_file(input_files, *, start_after=0, stop_after=None,
                 func = _extract_csv_file
             case '.jsonl':
                 func = _extract_jsonl_file
+            case '.db':
+                func = _extract_sqlite_file
+            case '.sqlite':
+                func = _extract_sqlite_file
             case _:
                 logger.warning(f'Failed to read corpus file (`input_file`): {input_file}')
                 continue
