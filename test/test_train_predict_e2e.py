@@ -1,8 +1,10 @@
 import json
 
+import pytest
+
 from konsepy.create_bio_dataset import create_bio_dataset
-from konsepy.predict_bio_dataset import predict_bio_dataset
-from konsepy.train_on_bio_dataset import train_on_bio_dataset
+from konsepy import predict_bio_dataset as predict_mod
+from konsepy import train_on_bio_dataset as train_mod
 
 TEXT = 'Ilmatar gave birth to Väinämöinen.'
 
@@ -39,6 +41,25 @@ def _get_created_dataset_path(outdir):
     return dataset_paths[0]
 
 
+@pytest.mark.skipif(
+    train_mod.AutoTokenizer is None
+    or train_mod.TrainingArguments is None
+    or train_mod.Trainer is None
+    or train_mod.DatasetDict is None
+    or train_mod.evaluate is None
+    or train_mod.np is None,
+    reason='training dependencies not installed',
+)
+@pytest.mark.skipif(
+    predict_mod.AutoTokenizer is None
+    or predict_mod.AutoModelForTokenClassification is None
+    or predict_mod.torch is None,
+    reason='prediction dependencies not installed',
+)
+@pytest.mark.skipif(
+    create_bio_dataset.__globals__.get('Dataset') is None,
+    reason='datasets not installed',
+)
 def test_create_train_predict_bio_dataset_e2e(tmp_path, bio_model_path):
     source_path = tmp_path / 'bio_source.jsonl'
     dataset_outdir = tmp_path / 'datasets'
@@ -59,7 +80,7 @@ def test_create_train_predict_bio_dataset_e2e(tmp_path, bio_model_path):
 
     dataset_path = _get_created_dataset_path(dataset_outdir)
 
-    train_on_bio_dataset(
+    train_mod.train_on_bio_dataset(
         dataset_path=dataset_path,
         outpath=model_outdir,
         run_name='ilmatar_hero',
@@ -84,7 +105,7 @@ def test_create_train_predict_bio_dataset_e2e(tmp_path, bio_model_path):
         encoding='utf8',
     )
 
-    output_path = predict_bio_dataset(
+    output_path = predict_mod.predict_bio_dataset(
         input_files=[input_file],
         outdir=prediction_outdir,
         model_path=model_outdir / 'ilmatar_hero.model',

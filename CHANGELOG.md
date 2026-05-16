@@ -18,7 +18,7 @@ Types of changes:
 
 ## [Unreleased]
 
-## [0.5.6]
+## [0.5.7]
 
 ### Added
 
@@ -217,9 +217,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.5.6...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.5.7...HEAD
 
-[0.5.6]: https://github.com/kpwhri/konsepy/compare/v0.5.1...v0.5.6
+[0.5.7]: https://github.com/kpwhri/konsepy/compare/v0.5.1...v0.5.7
 
 [0.5.1]: https://github.com/kpwhri/konsepy/compare/v0.5.0...v0.5.1
 

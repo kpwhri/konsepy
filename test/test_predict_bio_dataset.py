@@ -1,10 +1,14 @@
 import json
 
+import pytest
+
 from konsepy.predict_bio_dataset import (
     _iter_spans_from_labels_and_offsets,
     _load_id2label,
     _strip_bio_prefix,
 )
+
+from konsepy import predict_bio_dataset as mod
 
 
 def test_strip_bio_prefix_returns_none_for_o():
@@ -168,11 +172,6 @@ def test_load_id2label_converts_json_keys_to_ints(tmp_path):
     }
 
 
-import json
-
-from konsepy import predict_bio_dataset as mod
-
-
 class FakeModel:
     def to(self, device):
         return self
@@ -181,6 +180,11 @@ class FakeModel:
         return self
 
 
+@pytest.mark.skipif(
+    mod.AutoTokenizer is None or mod.AutoModelForTokenClassification is None,
+    reason='transformers not installed',
+)
+@pytest.mark.skipif(mod.torch is None, reason='torch not installed')
 def test_predict_bio_dataset_writes_predictions_jsonl(tmp_path, monkeypatch):
     input_file = tmp_path / 'notes.jsonl'
     input_file.write_text(
