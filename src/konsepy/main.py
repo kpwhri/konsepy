@@ -84,12 +84,6 @@ def main():
         type=Path,
         help='Path to id2label.json. Defaults to model parent directory.',
     )
-    predict_bio_ds_parser.add_argument('--encoding', default='utf8')
-    predict_bio_ds_parser.add_argument('--id-label', default='studyid')
-    predict_bio_ds_parser.add_argument('--noteid-label', default='note_id')
-    predict_bio_ds_parser.add_argument('--notedate-label', default='note_date')
-    predict_bio_ds_parser.add_argument('--notetext-label', default='text')
-    predict_bio_ds_parser.add_argument('--noteorder-label')
     predict_bio_ds_parser.add_argument('--max-length', type=int, default=512)
     predict_bio_ds_parser.add_argument('--device', help='Device to use, e.g. cpu, cuda, cuda:0.')
 
