@@ -3,11 +3,15 @@ import json
 from pathlib import Path
 
 from loguru import logger
-from transformers import AutoModelForTokenClassification, AutoTokenizer
 
 from konsepy.cli import add_outdir_and_infiles, clean_args
 from konsepy.constants import ID_LABEL, NOTEID_LABEL, NOTEDATE_LABEL, NOTETEXT_LABEL
 from konsepy.textio import iterate_csv_file
+try:
+    from transformers import AutoModelForTokenClassification, AutoTokenizer
+except ImportError:  # pragma: no cover - optional dependency
+    AutoModelForTokenClassification = None
+    AutoTokenizer = None
 try:
     import torch
 except ImportError:  # pragma: no cover - optional dependency
@@ -131,6 +135,10 @@ def predict_bio_dataset(
         merge_subwords=True,
 ):
     """Run a trained BIO token-classification model over raw input files."""
+    if torch is None:
+        raise ImportError('predict_bio_dataset requires torch to be installed.')
+    if AutoTokenizer is None or AutoModelForTokenClassification is None:
+        raise ImportError('predict_bio_dataset requires transformers to be installed.')
     outdir.mkdir(parents=True, exist_ok=True)
 
     tokenizer_path = tokenizer_path or model_path
