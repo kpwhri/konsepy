@@ -25,6 +25,29 @@ def saiga_antelope():
 def basedir() -> Path:
     return Path(__file__).resolve().parent
 
+
 @pytest.fixture
 def datadir(basedir) -> Path:
     return basedir / 'data'
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        '--bio-model-path',
+        action='store',
+        default=None,
+        help='Path to a trained BIO token-classification model for optional end-to-end prediction tests.',
+    )
+
+
+@pytest.fixture
+def bio_model_path(request):
+    value = request.config.getoption('--bio-model-path')
+    if not value:
+        pytest.skip('requires --bio-model-path')
+
+    path = Path(value)
+    if not path.exists():
+        pytest.skip(f'--bio-model-path does not exist: {path}')
+
+    return path

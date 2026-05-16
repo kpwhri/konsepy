@@ -6,15 +6,16 @@ from unittest.mock import patch
 import pytest
 from konsepy.main import main
 
-
 try:
     import spacy
+
     HAS_SPACY = True
 except ImportError:
     HAS_SPACY = False
 
 try:
     import datasets
+
     HAS_DATASETS = True
 except ImportError:
     HAS_DATASETS = False
@@ -174,14 +175,14 @@ def test_cli_create_bio_dataset(tmp_path, input_file):
     # we need a bio_tag_data.jsonl first.
     bio_out = tmp_path / 'bio_tag_for_ds'
     bio_out.mkdir()
-    
+
     with patch.object(sys, 'argv', [
         'konsepy', 'bio-tag', '--input-files', str(input_file),
         '--outdir', str(bio_out), '--package-name', 'example_nlp',
         '--id-label', 'chapter', '--noteid-label', 'chapter'
     ]):
         main()
-    
+
     bio_jsonl = bio_out / 'bio_tag_data.jsonl'
     ds_out = tmp_path / 'dataset_out'
     ds_out.mkdir()
@@ -200,3 +201,20 @@ def test_cli_create_bio_dataset(tmp_path, input_file):
     ds_dirs = list(ds_out.glob('*.dataset'))
     assert len(ds_dirs) == 1
     assert ds_dirs[0].is_dir()
+
+
+def test_predict_bio_dataset_cli_is_registered(capsys, monkeypatch):
+    monkeypatch.setattr(
+        'sys.argv',
+        [
+            'konsepy',
+            'predict-bio-dataset',
+            '--help',
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc:
+        main()
+
+    assert exc.value.code == 0
+    assert 'predict-bio-dataset' in capsys.readouterr().out

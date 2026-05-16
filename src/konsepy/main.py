@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from loguru import logger
 
+from konsepy.predict_bio_dataset import predict_bio_dataset
 from konsepy.run_all import run_all
 from konsepy.run_all_matches import run_all_matches
 from konsepy.run4snippets import run4snippets
@@ -70,6 +71,28 @@ def main():
     create_bio_ds_parser.add_argument('--test-size', type=float, default=0.1)
     create_bio_ds_parser.add_argument('--validation-size', type=float, default=0.05)
 
+    # predict-bio-dataset
+    predict_bio_ds_parser = subparsers.add_parser(
+        'predict-bio-dataset',
+        help='Run a trained BIO token-classification model over raw input files.',
+    )
+    add_outdir_and_infiles(predict_bio_ds_parser)
+    predict_bio_ds_parser.add_argument('model_path', type=Path, help='Path to trained token-classification model.')
+    predict_bio_ds_parser.add_argument('--tokenizer-path', type=Path, help='Path to tokenizer. Defaults to model path.')
+    predict_bio_ds_parser.add_argument(
+        '--id2label-path',
+        type=Path,
+        help='Path to id2label.json. Defaults to model parent directory.',
+    )
+    predict_bio_ds_parser.add_argument('--encoding', default='utf8')
+    predict_bio_ds_parser.add_argument('--id-label', default='studyid')
+    predict_bio_ds_parser.add_argument('--noteid-label', default='note_id')
+    predict_bio_ds_parser.add_argument('--notedate-label', default='note_date')
+    predict_bio_ds_parser.add_argument('--notetext-label', default='text')
+    predict_bio_ds_parser.add_argument('--noteorder-label')
+    predict_bio_ds_parser.add_argument('--max-length', type=int, default=512)
+    predict_bio_ds_parser.add_argument('--device', help='Device to use, e.g. cpu, cuda, cuda:0.')
+
     args = parser.parse_args()
 
     if not args.command:
@@ -94,6 +117,8 @@ def main():
         corpus2jsonl(**cmd_args)
     elif command == 'create-bio-dataset':
         create_bio_dataset(**cmd_args)
+    elif command == 'predict-bio-dataset':
+        predict_bio_dataset(**cmd_args)
 
 
 if __name__ == '__main__':

@@ -18,6 +18,10 @@ Types of changes:
 
 ## [Unreleased]
 
+### Added
+
+* Full pipeline of build bio corpus, train, and predict; e2e tests to ensure pipeline works
+
 ## [0.5.1]
 
 ### Added

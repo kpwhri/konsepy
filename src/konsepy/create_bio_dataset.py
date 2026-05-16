@@ -2,11 +2,11 @@ import argparse
 import datetime
 import json
 from pathlib import Path
+
 try:
-    from datasets import Dataset, Sequence
+    from datasets import Dataset, Features, Sequence, Value
 except ImportError:
-    Dataset = None
-    Sequence = None
+    Dataset, Features, Sequence, Value = None, None, None, None
 from konsepy.cli import clean_args
 from loguru import logger
 
@@ -87,17 +87,25 @@ def create_bio_dataset(path: Path, outpath: Path, test_size=0.1, validation_size
     tagset = set([x for el in all_ner_tags for x in el])
     logger.info(f'Tagset of length {len(tagset)}: {",".join(tagset)}')
 
-    ds = Dataset.from_dict({
-        'tokens': Sequence(features=all_tokens),
-        'ner_tags': Sequence(features=all_ner_tags),
-        'note_ids': all_note_ids,
+    features = Features({
+        'tokens': Sequence(Value('string')),
+        'ner_tags': Sequence(Value('string')),
+        'note_ids': Value('string'),
     })
+    ds = Dataset.from_dict({
+        'tokens': all_tokens,
+        'ner_tags': all_ner_tags,
+        'note_ids': all_note_ids,
+    }, features=features)
 
     res = ds.train_test_split(validation_size, shuffle=True)
-    length = len(all_note_ids)
-    num = length - (length * validation_size)
-    denom = length * test_size
-    ds = res['train'].train_test_split(test_size=num / denom, shuffle=True)
+    # split the remaining data into train/test, keeping the requested overall ratios
+    if test_size:
+        remaining_ratio = 1 - validation_size
+        test_ratio = test_size / remaining_ratio
+    else:
+        test_ratio = test_size
+    ds = res['train'].train_test_split(test_size=test_ratio, shuffle=True)
     ds['validation'] = res['test']
     ds.save_to_disk(outpath / f'{path.stem}.{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.dataset')
 

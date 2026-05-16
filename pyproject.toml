@@ -53,12 +53,16 @@ sas = [
 model = [
     'datasets',
     'transformers',
+    'evaluate',
+    'seqeval',
 ]
 all = [
     'spacy',
     'sas7bdat',
     'datasets',
     'transformers',
+    'evaluate',
+    'seqeval',
 ]
 
 [dependency-groups]

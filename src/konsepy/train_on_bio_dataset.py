@@ -1,4 +1,5 @@
 import argparse
+import inspect
 import json
 from pathlib import Path
 
@@ -6,14 +7,15 @@ from loguru import logger
 
 from transformers import AutoTokenizer, DataCollatorForTokenClassification, AutoModelForTokenClassification, \
     TrainingArguments, Trainer
-from datasets import load_dataset, load_from_disk, DatasetDict, load_metric
+import evaluate
+from datasets import DatasetDict
 import numpy as np
 
 
 def tokenize_adjust_labels(tokenizer, label2id):
     def _inner_tokenize_adjust_labels(all_samples_per_split):
         """Get values for input_ids, token_type_ids, attention_mask"""
-        tokenized_samples = tokenizer.batch_encode_plus(
+        tokenized_samples = tokenizer(
             all_samples_per_split['tokens'],
             is_split_into_words=True,
             padding='max_length',
@@ -48,11 +50,11 @@ def tokenize_adjust_labels(tokenizer, label2id):
 
 
 def compute_metrics(p, id2label):
-    metric = load_metric('seqeval')
+    metric = evaluate.load('seqeval')
     predictions, labels = p
     predictions = np.argmax(predictions, axis=2)
 
-    # Remove ignored index (special tokens)
+    # remove ignored index, such as special tokens
     true_predictions = [
         [id2label[p] for (p, l) in zip(prediction, label) if l != -100]
         for prediction, label in zip(predictions, labels)
@@ -72,6 +74,7 @@ def compute_metrics(p, id2label):
         'predicted_i': len([x for p in true_predictions for x in p if x.startswith('I')]),
         'predicted_o': len([x for p in true_predictions for x in p if x.startswith('O')]),
     }
+    return flattened_results
 
 
 def train_on_bio_dataset(dataset_path: Path, outpath: Path, run_name: str, pretrained_tokenizer: str = None,
@@ -88,7 +91,13 @@ def train_on_bio_dataset(dataset_path: Path, outpath: Path, run_name: str, pretr
         padding='max_length',
         max_length=512,
     )
-    model = AutoModelForTokenClassification.from_pretrained(pretrained_model)
+    model = AutoModelForTokenClassification.from_pretrained(
+        pretrained_model,
+        num_labels=len(label2id),
+        id2label=id2label,
+        label2id=label2id,
+        ignore_mismatched_sizes=True,  # TODO: added just for e2e testing on arbitrary model
+    )
     default_params = {
                          'evaluation_strategy': 'steps',
                          'learning_rate': 2e-4,
@@ -99,20 +108,33 @@ def train_on_bio_dataset(dataset_path: Path, outpath: Path, run_name: str, pretr
                          'logging_steps': 1000,
                          'save_strategy': 'no',
                      } | params
+    sig_params = set(inspect.signature(TrainingArguments.__init__).parameters)
+    resolved_params = dict(default_params)
+    if 'evaluation_strategy' in resolved_params and 'evaluation_strategy' not in sig_params:
+        if 'eval_strategy' in sig_params:
+            resolved_params['eval_strategy'] = resolved_params.pop('evaluation_strategy')
+        else:
+            resolved_params.pop('evaluation_strategy')
+    resolved_params = {k: v for k, v in resolved_params.items() if k in sig_params}
     training_args = TrainingArguments(
         output_dir=str(outpath),
         run_name=run_name,
-        **default_params,
+        **resolved_params,
     )
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=tokenized_dataset['train'],
-        eval_dataset=tokenized_dataset['test'],
-        data_collator=data_collator,
-        tokenizer=tokenizer,
-        compute_metrics=compute_metrics
-    )
+    trainer_kwargs = {
+        'model': model,
+        'args': training_args,
+        'train_dataset': tokenized_dataset['train'],
+        'eval_dataset': tokenized_dataset['test'],
+        'data_collator': data_collator,
+        'compute_metrics': lambda p: compute_metrics(p, id2label),
+    }
+    trainer_sig = set(inspect.signature(Trainer.__init__).parameters)
+    if 'tokenizer' in trainer_sig:
+        trainer_kwargs['tokenizer'] = tokenizer
+    elif 'processing_class' in trainer_sig:
+        trainer_kwargs['processing_class'] = tokenizer
+    trainer = Trainer(**trainer_kwargs)
     trainer.train()
     trainer.save_model(outpath / f'{run_name}.model')
     with open(outpath / 'id2label.json', 'w') as out:
