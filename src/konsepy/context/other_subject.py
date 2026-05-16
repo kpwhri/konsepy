@@ -7,7 +7,7 @@ OTHER_SUBJECT = [
     'parent', 'dtr', 'daughter', 'son', 'child', 'children',
     'aunt', 'uncle', 'niece', 'nephew', 'cousin',
     'gma', 'grandma', 'grandmother', 'gpa', 'grandpa', 'grandfather',
-    'grandparent', 'grandparents', 'grand\W*parent\(s\)',
+    'grandparent', 'grandparents', r'grand\W*parent\(s\)',
     r'grand\W?daughter', 'gdtr',
     'husb(?:and)?', 'wife', 'wives', 'spouse', 'partner', r'(?:girl|boy)\W?friend',
     'neighbou?r', r'significant\W*other', 'person',
@@ -15,7 +15,7 @@ OTHER_SUBJECT = [
     'physician', 'doctor', 'family', r'co\W?worker',
     r'(?:house|room|flat)\W?mate', 'colleague', 'employe[re]', 'others',
     'family (?:history|hx)', 'maternal', 'paternal',
-    'parents', 'parent\(s\)',
+    'parents', r'parent\(s\)',
 ]
 
 OTHER_SUBJECT_RX = re.compile('(?:{})'.format(

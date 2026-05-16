@@ -2,13 +2,16 @@ import argparse
 import json
 from pathlib import Path
 
-import torch
 from loguru import logger
 from transformers import AutoModelForTokenClassification, AutoTokenizer
 
 from konsepy.cli import add_outdir_and_infiles, clean_args
 from konsepy.constants import ID_LABEL, NOTEID_LABEL, NOTEDATE_LABEL, NOTETEXT_LABEL
 from konsepy.textio import iterate_csv_file
+try:
+    import torch
+except ImportError:  # pragma: no cover - optional dependency
+    torch = None
 
 
 def _load_id2label(path: Path):
@@ -83,6 +86,8 @@ def _iter_predicted_spans(
         device='cpu',
         merge_subwords=True,
 ):
+    if torch is None:
+        raise ImportError('predict_bio_dataset requires torch to be installed.')
     encoded = tokenizer(
         text,
         return_offsets_mapping=True,
@@ -130,7 +135,8 @@ def predict_bio_dataset(
 
     tokenizer_path = tokenizer_path or model_path
     id2label_path = id2label_path or model_path.parent / 'id2label.json'
-    device = device or ('cuda' if torch.cuda.is_available() else 'cpu')
+    if device is None:
+        device = 'cpu' if torch is None else ('cuda' if torch.cuda.is_available() else 'cpu')
 
     logger.info(f'Loading tokenizer from {tokenizer_path}')
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
