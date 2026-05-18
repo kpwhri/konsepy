@@ -526,13 +526,6 @@ class ScoreCategory(enum.Enum):
     UNKNOWN = -1
 
 
-def label_score(*, extracted, **_):
-    return ExtractionResult(
-        label=ScoreCategory.SCORE,
-        value=extracted,
-    )
-
-
 REGEXES = [
     (
         re.compile(r'\bscore\s*:\s*(?P<target>\d+)\b', re.I),
