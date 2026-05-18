@@ -22,6 +22,10 @@ Types of changes:
 
 * Added BIO model pipeline documentation covering dataset creation, training, and prediction commands
 
+### Fixed
+
+* Overlap suppression wasn't available on the outer/public wrappers so it couldn't be controlled from there.
+
 ## [0.5.8]
 
 ### Fixed

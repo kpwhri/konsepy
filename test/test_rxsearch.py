@@ -535,9 +535,10 @@ def test_suppress_overlaps_prevents_later_match_inside_earlier_match():
     ]
 
     search = search_all_regex(regexes)
+    search_suppress = search_all_regex(regexes, suppress_overlaps=True)
 
     assert list(search('not x')) == [Category.NEGATED_HERO, Category.HERO]
-    assert list(search('not x', suppress_overlaps=True)) == [Category.NEGATED_HERO]
+    assert list(search_suppress('not x')) == [Category.NEGATED_HERO]
 
 
 def test_suppress_overlaps_allows_non_overlapping_later_matches():
@@ -546,9 +547,9 @@ def test_suppress_overlaps_allows_non_overlapping_later_matches():
         (re.compile(r'x'), Category.HERO),
     ]
 
-    search = search_all_regex(regexes)
+    search = search_all_regex(regexes, suppress_overlaps=True)
 
-    assert list(search('not x and x', suppress_overlaps=True)) == [
+    assert list(search('not x and x')) == [
         Category.NEGATED_HERO,
         Category.HERO,
     ]
@@ -560,11 +561,11 @@ def test_suppress_overlaps_preserves_indices():
         (re.compile(r'x'), Category.HERO),
     ]
 
-    search = search_all_regex(regexes)
+    search = search_all_regex(regexes, suppress_overlaps=True)
 
     assert [
                (result, match.group(), match.start(), match.end())
-               for result, match in search('not x and x', include_match=True, suppress_overlaps=True)
+               for result, match in search('not x and x', include_match=True)
            ] == [
                (Category.NEGATED_HERO, 'not x', 0, 5),
                (Category.HERO, 'x', 10, 11),
@@ -577,9 +578,9 @@ def test_search_first_regex_forwards_suppress_overlaps():
         (re.compile(r'x'), Category.HERO),
     ]
 
-    search = search_first_regex(regexes)
+    search = search_first_regex(regexes, suppress_overlaps=True)
 
-    assert list(search('not x and x', suppress_overlaps=True)) == [Category.NEGATED_HERO]
+    assert list(search('not x and x')) == [Category.NEGATED_HERO]
 
 
 def test_get_all_regex_by_index_forwards_suppress_overlaps():
@@ -588,9 +589,9 @@ def test_get_all_regex_by_index_forwards_suppress_overlaps():
         (re.compile(r'x'), Category.HERO),
     ]
 
-    get_by_index = get_all_regex_by_index(regexes)
+    get_by_index = get_all_regex_by_index(regexes, suppress_overlaps=True)
 
-    assert list(get_by_index('not x and x', suppress_overlaps=True)) == [
+    assert list(get_by_index('not x and x')) == [
         (Category.NEGATED_HERO, 'not x', 0, 5),
         (Category.HERO, 'x', 10, 11),
     ]
@@ -922,6 +923,7 @@ def test_extract_wrapper_include_match_returns_extracted_value_and_match():
     assert match.start() == 0
     assert match.end() == 9
 
+
 def test_extract_wrapper_supports_suppress_overlaps():
     regexes = [
         (
@@ -934,9 +936,9 @@ def test_extract_wrapper_supports_suppress_overlaps():
         ),
     ]
 
-    extract = extract_all_regex_target(regexes, transform=int)
+    extract = extract_all_regex_target(regexes, transform=int, suppress_overlaps=True)
 
-    assert list(extract('not score: 3 score: 8', suppress_overlaps=True)) == [3, 8]
+    assert list(extract('not score: 3 score: 8')) == [3, 8]
 
 
 def test_extract_wrapper_suppress_overlaps_skips_inner_extraction():
@@ -951,6 +953,8 @@ def test_extract_wrapper_suppress_overlaps_skips_inner_extraction():
         ),
     ]
 
-    extract = extract_all_regex_target(regexes, transform=int)
+    extract = extract_all_regex_target(regexes, transform=int, suppress_overlaps=True)
 
-    assert list(extract('not score: 3', suppress_overlaps=True)) == [3]
+    assert list(extract('not score: 3')) == [3]
+
+

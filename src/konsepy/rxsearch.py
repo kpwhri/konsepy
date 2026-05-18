@@ -10,7 +10,7 @@ _DEFAULT_WINDOW = 30
 SKIP = object()
 
 
-def search_all_regex(regexes, window=_DEFAULT_WINDOW, word_window=None):
+def search_all_regex(regexes, window=_DEFAULT_WINDOW, word_window=None, suppress_overlaps=False):
     """
     Search text with all regex definitions.
 
@@ -45,6 +45,7 @@ def search_all_regex(regexes, window=_DEFAULT_WINDOW, word_window=None):
         regexes: Iterable of regex definition tuples.
         window: Context window size for post-processing functions.
         word_window: Size of context window in terms of words.
+        suppress_overlaps: Prevent regexes from matching an already-matched section.
 
     Returns:
         A function that takes text and returns a generator of results.
@@ -54,10 +55,11 @@ def search_all_regex(regexes, window=_DEFAULT_WINDOW, word_window=None):
         window=window,
         word_window=word_window,
         extractor=None,
+        suppress_overlaps=suppress_overlaps,
     )
 
 
-def search_first_regex(regexes, window=_DEFAULT_WINDOW, word_window=None):
+def search_first_regex(regexes, window=_DEFAULT_WINDOW, word_window=None, suppress_overlaps=False):
     """
     Return only the first result found among all regexes.
 
@@ -65,19 +67,18 @@ def search_first_regex(regexes, window=_DEFAULT_WINDOW, word_window=None):
         regexes: Iterable of regex definition tuples.
         window: Context window size for post-processing functions.
         word_window: Size of context window in terms of words.
+        suppress_overlaps: Prevent regexes from matching an already-matched section.
 
     Returns:
         A function that takes text and returns a generator yielding at most one result.
     """
-    search_all = search_all_regex(regexes, window=window, word_window=word_window)
+    search_all = search_all_regex(regexes, window=window, word_window=word_window, suppress_overlaps=suppress_overlaps)
 
-    def _search_first_regex(text, *, include_match=False, ignore_indices=False,
-                            suppress_overlaps=False, categories_only=False):
+    def _search_first_regex(text, *, include_match=False, ignore_indices=False, categories_only=False):
         for result in search_all(
                 text,
                 include_match=include_match,
                 ignore_indices=ignore_indices,
-                suppress_overlaps=suppress_overlaps,
                 categories_only=categories_only,
         ):
             yield result
@@ -95,6 +96,7 @@ def extract_all_regex_target(
         transform=None,
         missing=SKIP,
         unmatched=SKIP,
+        suppress_overlaps=False,
 ):
     """
     Extract all values from a regex group, defaulting to the named group 'target'.
@@ -119,10 +121,11 @@ def extract_all_regex_target(
         window=window,
         word_window=word_window,
         extractor=extractor,
+        suppress_overlaps=suppress_overlaps,
     )
 
 
-def _search_regex(regexes, window=_DEFAULT_WINDOW, word_window=None, *, extractor=None):
+def _search_regex(regexes, window=_DEFAULT_WINDOW, word_window=None, *, extractor=None, suppress_overlaps=False):
     """
     Shared regex search engine.
 
@@ -137,8 +140,7 @@ def _search_regex(regexes, window=_DEFAULT_WINDOW, word_window=None, *, extracto
         A function that takes text and returns a generator of results.
     """
 
-    def _run_search(text, *, include_match=False, ignore_indices=False,
-                    suppress_overlaps=False, categories_only=False):
+    def _run_search(text, *, include_match=False, ignore_indices=False, categories_only=False):
         found_non_unknown = False
         claimed_spans = SpanTracker()
 
@@ -208,6 +210,7 @@ def extract_first_regex_target(
         transform=None,
         missing=SKIP,
         unmatched=SKIP,
+        suppress_overlaps=False,
 ):
     """
     Extract the first value from a regex group, defaulting to the named group 'target'.
@@ -232,15 +235,14 @@ def extract_first_regex_target(
         transform=transform,
         missing=missing,
         unmatched=unmatched,
+        suppress_overlaps=suppress_overlaps,
     )
 
-    def _extract_first_regex(text, *, include_match=False, ignore_indices=False,
-                             suppress_overlaps=False, categories_only=False):
+    def _extract_first_regex(text, *, include_match=False, ignore_indices=False, categories_only=False):
         for result in search_all(
                 text,
                 include_match=include_match,
                 ignore_indices=ignore_indices,
-                suppress_overlaps=suppress_overlaps,
                 categories_only=categories_only,
         ):
             yield result
@@ -304,7 +306,7 @@ def extract_group_as(name_or_index='target', transform=str, *, missing=SKIP, unm
     return _extract_group_as
 
 
-def get_all_regex_by_index(regexes, window=_DEFAULT_WINDOW, word_window=None):
+def get_all_regex_by_index(regexes, window=_DEFAULT_WINDOW, word_window=None, suppress_overlaps=False):
     """
     Return all results along with their matched text and indices.
 
@@ -316,15 +318,13 @@ def get_all_regex_by_index(regexes, window=_DEFAULT_WINDOW, word_window=None):
     Returns:
         A function that takes text and returns a generator of (result, match_text, start, end).
     """
-    search_all = search_all_regex(regexes, window=window, word_window=word_window)
+    search_all = search_all_regex(regexes, window=window, word_window=word_window, suppress_overlaps=suppress_overlaps)
 
-    def _get_all_regex_by_index(text, *, ignore_indices=False,
-                                suppress_overlaps=False, categories_only=False):
+    def _get_all_regex_by_index(text, *, ignore_indices=False, categories_only=False):
         for result, match in search_all(
                 text,
                 include_match=True,
                 ignore_indices=ignore_indices,
-                suppress_overlaps=suppress_overlaps,
                 categories_only=categories_only,
         ):
             yield result, match.group(), match.start(), match.end()
@@ -332,7 +332,7 @@ def get_all_regex_by_index(regexes, window=_DEFAULT_WINDOW, word_window=None):
     return _get_all_regex_by_index
 
 
-def search_and_replace_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=None):
+def search_and_replace_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=None, suppress_overlaps=True):
     """
     Deprecated compatibility wrapper for overlap-suppressed search.
 
@@ -353,7 +353,7 @@ def search_and_replace_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=N
         stacklevel=2,
     )
 
-    search_all = search_all_regex(regexes, window=window, word_window=word_window)
+    search_all = search_all_regex(regexes, window=window, word_window=word_window, suppress_overlaps=suppress_overlaps)
 
     def _search_and_replace_regex(text, *, include_match=False,
                                   ignore_indices=False, categories_only=False):
@@ -361,14 +361,13 @@ def search_and_replace_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=N
             text,
             include_match=include_match,
             ignore_indices=ignore_indices,
-            suppress_overlaps=True,
             categories_only=categories_only,
         )
 
     return _search_and_replace_regex
 
 
-def search_all_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=None):
+def search_all_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=None, suppress_overlaps=False):
     """
     Deprecated alias for search_all_regex().
     """
@@ -377,10 +376,10 @@ def search_all_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=None):
         DeprecationWarning,
         stacklevel=2,
     )
-    return search_all_regex(regexes, window=window, word_window=word_window)
+    return search_all_regex(regexes, window=window, word_window=word_window, suppress_overlaps=suppress_overlaps)
 
 
-def search_first_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=None):
+def search_first_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=None, suppress_overlaps=False):
     """
     Deprecated alias for search_first_regex().
     """
@@ -389,10 +388,10 @@ def search_first_regex_func(regexes, window=_DEFAULT_WINDOW, word_window=None):
         DeprecationWarning,
         stacklevel=2,
     )
-    return search_first_regex(regexes, window=window, word_window=word_window)
+    return search_first_regex(regexes, window=window, word_window=word_window, suppress_overlaps=suppress_overlaps)
 
 
-def search_all_regex_match_func(regexes, window=_DEFAULT_WINDOW, word_window=None):
+def search_all_regex_match_func(regexes, window=_DEFAULT_WINDOW, word_window=None, suppress_overlaps=False):
     """
     Deprecated alias for search_all_regex().
     """
@@ -401,7 +400,7 @@ def search_all_regex_match_func(regexes, window=_DEFAULT_WINDOW, word_window=Non
         DeprecationWarning,
         stacklevel=2,
     )
-    return search_all_regex(regexes, window=window, word_window=word_window)
+    return search_all_regex(regexes, window=window, word_window=word_window, suppress_overlaps=suppress_overlaps)
 
 
 class SpanTracker:
