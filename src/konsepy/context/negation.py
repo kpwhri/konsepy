@@ -3,10 +3,10 @@ import re
 from konsepy.context.contexts import get_contexts
 
 DEFAULT_PRENEG_PAT = re.compile(
-    rf'\b(?:family|or|no concerns?|no|none|deny|denies|denied|(?:no|neg|negative)\W*to|not)\b'
+    rf'\b(?:family|or|no concerns?|no|none|deny|denies|denied|(?:no|neg|negative)\W*to|not|never)\b'
 )
 DEFAULT_POSTNEG_PAT = re.compile(
-    rf'\b(?:no concerns?|or|no|none|deny|denies|denied|absent|not at all)\b'
+    rf'\b(?:no concerns?|or|no|none|deny|denies|denied|absent|not at all|never)\b'
 )
 
 
@@ -24,10 +24,12 @@ def check_if_negated(m, precontext, postcontext, text, window, neg_concept=True,
     elif m2 := has_negation(postcontext, direction=1, **kwargs):
         direction = 1
     if m2:
-        if is_not_negated(**get_contexts(
-                m2, text, context_match=m, context_window=window, context_direction=direction
-        )):
-            return None
+        # TODO: fix this: I think it's uposed to look between matches for puncutation (already accounted for)
+        #   or double negation terms; right now, the negative word is not passed on
+        # if is_not_negated(**get_contexts(
+        #         m2, text, context_match=m, context_window=window, context_direction=direction
+        # )):
+        #     return None
         return neg_concept
     return None
 
