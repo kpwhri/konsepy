@@ -558,9 +558,10 @@ REGEXES = [
 ]
 
 search = search_all_regex(REGEXES)
+search_suppress = search_all_regex(REGEXES, suppress_overlaps=True)
 
 print(list(search('not x')))
-print(list(search('not x', suppress_overlaps=True)))
+print(list(search_suppress('not x')))
 ```
 
 Output:
@@ -576,7 +577,7 @@ stable.
 Non-overlapping later matches are still returned.
 
 ```python
-print(list(search('not x and x', suppress_overlaps=True)))
+print(list(search_suppress('not x and x')))
 ```
 
 Output:
@@ -645,9 +646,9 @@ search_and_replace_regex_func()
 instead of modifying the searched text. Prefer:
 
 ```python
-search = search_all_regex(REGEXES)
+search = search_all_regex(REGEXES, suppress_overlaps=True)
 
-results = list(search(text, suppress_overlaps=True))
+results = list(search(text))
 ```
 
 ## Regex Utilities
