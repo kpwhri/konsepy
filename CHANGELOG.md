@@ -18,6 +18,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.5.9] - 2026-05-18
+
 ### Added
 
 * Added BIO model pipeline documentation covering dataset creation, training, and prediction commands
@@ -30,7 +32,8 @@ Types of changes:
 
 ### Fixed
 
-* Don't require ExtractionResult to be specified, but concept can just be supplied as second argument to run_regexes_func.
+* Don't require ExtractionResult to be specified, but concept can just be supplied as second argument to
+  run_regexes_func.
 
 ## [0.5.7]
 
@@ -231,7 +234,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.5.8...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.5.9...HEAD
+
+[0.5.9]: https://github.com/kpwhri/konsepy/compare/v0.5.8...v0.5.9
 
 [0.5.8]: https://github.com/kpwhri/konsepy/compare/v0.5.7...v0.5.8
 
