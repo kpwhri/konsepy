@@ -18,6 +18,10 @@ Types of changes:
 
 ## [Unreleased]
 
+### Added
+
+* Added BIO model pipeline documentation covering dataset creation, training, and prediction commands
+
 ## [0.5.8]
 
 ### Fixed
