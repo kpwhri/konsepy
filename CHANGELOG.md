@@ -21,6 +21,12 @@ Types of changes:
 ### Fixed
 
 * Negation should now return SKIP rather than True
+* Other subject regex was not set to be case sensitive
+
+### Changed
+
+* Other_subject detection will only return match if requested, defaulting to SKIP
+
 
 ## [0.5.9] - 2026-05-18
 

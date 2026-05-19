@@ -3,11 +3,13 @@ import re
 import pytest
 
 from konsepy.context.other_subject import has_other_subject, check_if_other_subject
+from konsepy.rxsearch import SKIP
 
 
 @pytest.mark.parametrize('pattern, text, banned_characters, exp', [
     ('drinks?', 'father drinks', '.', 'father'),
     ('drinks?', 'drinks mother', '.', None),
+    ('drinks?', 'MOTHER drinks', '.', 'MOTHER'),
 ])
 def test_other_subject_before(pattern, text, banned_characters, exp):
     m = re.search(pattern, text, re.I)
@@ -42,6 +44,10 @@ def test_check_if_other_subject(pattern, text, banned_characters, exp):
     precontext = text[:m.start()]
     postcontext = text[m.end():]
     if res := check_if_other_subject(m, precontext, postcontext, text):
-        assert res.group() == exp
+        if res is SKIP:  # other subjec was found
+            m2 = check_if_other_subject(m, precontext, postcontext, text, return_match=True)
+            assert m2.group() == exp
+        else:
+            assert res == exp  # just cause an error, this path should not be tread
     else:
         assert res == exp  # None

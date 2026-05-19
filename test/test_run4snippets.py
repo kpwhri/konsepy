@@ -84,7 +84,7 @@ def test_run4snippets_only_categories(tmp_path, input_file, caplog):
     loglines = [line for line in caplog.text.split('\n') if line.strip()]
     assert any('Arguments ignored: {}' in line for line in loglines)
     assert any('Loaded 3 concepts for processing' in line for line in loglines)
-    assert any('Output 4 rows' in line for line in loglines)
+    assert any('Output 70 rows' in line for line in loglines)
     assert any('Total records: 117' in line for line in loglines)
 
     # test jsonlines output

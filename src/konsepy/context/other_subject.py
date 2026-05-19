@@ -20,7 +20,8 @@ OTHER_SUBJECT = [
 ]
 
 OTHER_SUBJECT_RX = re.compile('(?:{})'.format(
-    '|'.join(rf'\b{x}\'?\b' for x in OTHER_SUBJECT))
+    '|'.join(rf'\b{x}\'?\b' for x in OTHER_SUBJECT)),
+    re.I,
 )
 
 
@@ -55,19 +56,19 @@ def is_not_other_subject(m, precontext, postcontext, **kwargs):
 
 
 def check_if_other_subject(m, precontext, postcontext, text, window=30, banned_characters='.',
-                           other_concept=SKIP, **kwargs):
+                           other_concept=SKIP, return_match=False, **kwargs):
     if m2 := has_other_subject(precontext, direction=-1, banned_characters=banned_characters):
         if is_not_other_subject(**get_contexts(
                 m2, text, context_match=m, context_window=window, context_direction=-1,
         )):
             pass  # might still be in post-context
         else:
-            return m2 if other_concept is True else other_concept
+            return m2 if return_match else other_concept
     if m2 := has_other_subject(postcontext, direction=1, banned_characters=banned_characters):
         if is_not_other_subject(**get_contexts(
                 m2, text, context_match=m, context_window=window, context_direction=1,
         )):
             pass
         else:
-            return m2 if other_concept is True else other_concept
+            return m2 if return_match else other_concept
     return None
