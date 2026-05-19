@@ -1,6 +1,7 @@
 import re
 
 from konsepy.context.contexts import get_contexts
+from konsepy.rxsearch import SKIP
 
 DEFAULT_PRENEG_PAT = re.compile(
     rf'\b(?:family|or|no concerns?|no|none|deny|denies|denied|(?:no|neg|negative)\W*to|not|never)\b'
@@ -17,7 +18,7 @@ def is_not_negated(m, precontext, postcontext, banned_characters='.', **kwargs):
     )
 
 
-def check_if_negated(m, precontext, postcontext, text, window, neg_concept=True, **kwargs):
+def check_if_negated(m, precontext, postcontext, text, window, neg_concept=SKIP, **kwargs):
     direction = 0
     if m2 := has_negation(precontext, direction=-1, **kwargs):
         direction = -1

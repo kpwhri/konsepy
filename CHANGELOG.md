@@ -18,6 +18,10 @@ Types of changes:
 
 ## [Unreleased]
 
+### Fixed
+
+* Negation should now return SKIP rather than True
+
 ## [0.5.9] - 2026-05-18
 
 ### Added

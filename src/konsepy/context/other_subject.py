@@ -1,6 +1,7 @@
 import re
 
 from konsepy.context.contexts import get_contexts
+from konsepy.rxsearch import SKIP
 
 OTHER_SUBJECT = [
     'brother', 'sister', 'sibling', 'mother', 'mom', 'father', 'dad',
@@ -54,7 +55,7 @@ def is_not_other_subject(m, precontext, postcontext, **kwargs):
 
 
 def check_if_other_subject(m, precontext, postcontext, text, window=30, banned_characters='.',
-                           other_concept=True, **kwargs):
+                           other_concept=SKIP, **kwargs):
     if m2 := has_other_subject(precontext, direction=-1, banned_characters=banned_characters):
         if is_not_other_subject(**get_contexts(
                 m2, text, context_match=m, context_window=window, context_direction=-1,
