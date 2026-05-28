@@ -18,6 +18,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-05-28
+
 ### Fixed
 
 * Negation should now return SKIP rather than True
@@ -27,7 +29,6 @@ Types of changes:
 ### Changed
 
 * Other_subject detection will only return match if requested, defaulting to SKIP
-
 
 ## [0.5.9] - 2026-05-18
 
@@ -245,7 +246,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.5.9...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.6.0...HEAD
+
+[0.6.0]: https://github.com/kpwhri/konsepy/compare/v0.5.9...v0.6.0
 
 [0.5.9]: https://github.com/kpwhri/konsepy/compare/v0.5.8...v0.5.9
 
