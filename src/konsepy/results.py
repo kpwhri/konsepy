@@ -10,6 +10,16 @@ class ExtractionResult:
     value: Any
     group: Optional[str] = None
 
+    def __int__(self):
+        return int(self.value)
+
+    def __float__(self):
+        return float(self.value)
+
+    def __str__(self):
+        return str(self.value)
+
+
 
 def get_result_label(result):
     if isinstance(result, ExtractionResult):

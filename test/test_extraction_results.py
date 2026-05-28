@@ -196,6 +196,9 @@ def test_extract_all_regex_target_wraps_enum_label():
     assert isinstance(result, ExtractionResult)
     assert result.label == ScoreCategory.SCORE
     assert result.value == 10
+    assert int(result) == 10
+    assert str(result) == '10'
+    assert float(result) == 10.0
 
 
 def test_extract_all_regex_target_allows_postprocessor_override():

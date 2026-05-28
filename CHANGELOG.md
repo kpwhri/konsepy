@@ -22,6 +22,7 @@ Types of changes:
 
 * Negation should now return SKIP rather than True
 * Other subject regex was not set to be case sensitive
+* Allow extraction result to be coerced into float/int/str, which will return just the value as that type
 
 ### Changed
 
