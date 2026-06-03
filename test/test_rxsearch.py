@@ -958,3 +958,22 @@ def test_extract_wrapper_suppress_overlaps_skips_inner_extraction():
     assert list(extract('not score: 3')) == [3]
 
 
+def test_extract_target_extracted_context():
+    def exclude_score(*, extracted_precontext, **_):
+        if 'score' in extracted_precontext:
+            return SKIP
+        return None
+
+    regexes = [
+        (
+            re.compile(r'score:\s*(?P<target>\d+)'),
+            None,
+            [exclude_score],
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes, transform=int, suppress_overlaps=True)
+
+    assert list(extract('score: 3')) == []
+
+

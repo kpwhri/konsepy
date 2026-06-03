@@ -2,7 +2,7 @@ from bisect import bisect_left
 from enum import Enum
 from warnings import warn
 
-from konsepy.context.contexts import get_contexts
+from konsepy.context.contexts import get_contexts, get_contexts_by_index
 from konsepy.results import ExtractionResult
 
 _DEFAULT_WINDOW = 30
@@ -164,9 +164,9 @@ def _search_regex(regexes, window=_DEFAULT_WINDOW, word_window=None, *, extracto
 
                     contexts = get_contexts(m, text, window, word_window=word_window)
                     default_result = category
-
+                    
                     if extractor is not None:
-                        extracted = extractor(**contexts)
+                        extracted, ext_start, ext_end = extractor(**contexts, return_indices=True)
 
                         if extracted is SKIP:
                             continue
@@ -175,6 +175,12 @@ def _search_regex(regexes, window=_DEFAULT_WINDOW, word_window=None, *, extracto
                         contexts['extracted_value'] = extracted
 
                         if extracted is not None:
+                            ext_contexts = get_contexts_by_index(ext_start, ext_end, text, window,
+                                                                 word_window=word_window)
+                            contexts['extracted_precontext'] = ext_contexts['precontext']
+                            contexts['extracted_postcontext'] = ext_contexts['postcontext']
+                            contexts['extracted_around'] = ext_contexts['around']
+
                             if isinstance(category, Enum):
                                 default_result = ExtractionResult(label=category, value=extracted)
                             else:
@@ -261,24 +267,25 @@ def extract_group(name_or_index='target', *, missing=SKIP, unmatched=SKIP):
         unmatched: Value returned if the group exists but did not match. Defaults to SKIP.
 
     Returns:
-        A post-processing function.
+        A post-processing function which returns value (if return_indices=False), otherwise value, start, end
     """
 
-    def _extract_group(*, m, **_):
+    def _extract_group(*, m, return_indices=False, **_):
         try:
             value = m.group(name_or_index)
         except (IndexError, KeyError):
-            return missing
+            return (missing, None, None) if return_indices else missing
 
         if value is None:
-            return unmatched
+            return (unmatched, None, None) if return_indices else unmatched
 
-        return value
+        return (value, m.start(name_or_index), m.end(name_or_index)) if return_indices else value
 
     return _extract_group
 
 
-def extract_group_as(name_or_index='target', transform=str, *, missing=SKIP, unmatched=SKIP):
+def extract_group_as(name_or_index='target', transform=str,
+                     *, missing=SKIP, unmatched=SKIP):
     """
     Return a post-processing function that extracts and transforms a regex group.
 
@@ -289,19 +296,19 @@ def extract_group_as(name_or_index='target', transform=str, *, missing=SKIP, unm
         unmatched: Value returned if the group exists but did not match. Defaults to SKIP.
 
     Returns:
-        A post-processing function.
+        A post-processing function which returns value (if return_indices=False), otherwise value, start, end
     """
 
-    def _extract_group_as(*, m, **_):
+    def _extract_group_as(*, m, return_indices=False, **_):
         try:
             value = m.group(name_or_index)
         except (IndexError, KeyError):
-            return missing
+            return (missing, None, None) if return_indices else missing
 
         if value is None:
-            return unmatched
+            return (unmatched, None, None) if return_indices else unmatched
 
-        return transform(value)
+        return (transform(value), m.start(name_or_index), m.end(name_or_index)) if return_indices else transform(value)
 
     return _extract_group_as
 
