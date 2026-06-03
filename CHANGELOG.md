@@ -18,6 +18,13 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-06-03
+
+### Added
+
+* Allow detecting context around the target when the target appears in a match. These can be accessed by:
+  extracted_precontext, extracted_postcontext, extracted_around
+
 ## [0.6.0] - 2026-05-28
 
 ### Fixed
@@ -246,7 +253,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.6.0...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.6.1...HEAD
+
+[0.6.1]: https://github.com/kpwhri/konsepy/compare/v0.6.0...v0.6.1
 
 [0.6.0]: https://github.com/kpwhri/konsepy/compare/v0.5.9...v0.6.0
 

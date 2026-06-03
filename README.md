@@ -440,6 +440,9 @@ extracted value is passed to postprocessors as:
 
 - `extracted`
 - `extracted_value`
+- `extracted_precontext`: precontext started at the target
+- `extracted_postcontext`: postcontext started at the target
+- `extracted_around`: precontext and postcontext started at the target
 
 If a postprocessor returns `None`, the extracted value is returned.
 
