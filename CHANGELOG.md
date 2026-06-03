@@ -18,6 +18,10 @@ Types of changes:
 
 ## [Unreleased]
 
+## Changed
+
+* `run4snippets` will output to directory starting with 'run4snippets_{date}', updated tests
+
 ## [0.6.1] - 2026-06-03
 
 ### Added

@@ -113,7 +113,7 @@ def test_cli_run4snippets(tmp_path, input_file):
     with patch.object(sys, 'argv', test_args):
         main()
 
-    snippet_dirs = list(outdir.glob('run_all_*'))
+    snippet_dirs = list(outdir.glob('run4snippets_*'))
     assert len(snippet_dirs) == 1
     actual_outdir = snippet_dirs[0]
 
@@ -123,8 +123,12 @@ def test_cli_run4snippets(tmp_path, input_file):
         assert len(lines) > 0
         first_entry = json.loads(lines[0])
         assert 'precontext' in first_entry
+        assert 'pretext' in first_entry
         assert 'postcontext' in first_entry
+        assert 'posttext' in first_entry
         assert 'match' in first_entry
+        assert first_entry['precontext'] in first_entry['pretext']
+        assert first_entry['postcontext'] in first_entry['posttext']
 
 
 def test_cli_bio_tag(tmp_path, input_file):

@@ -44,9 +44,9 @@ def run4snippets(input_files, outdir: pathlib.Path, package_name: str, *,
     order_metadata = order_metadata or list()
 
     dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    curr_outdir = outdir / f'run_all_{dt}'
+    curr_outdir = outdir / f'run4snippets_{dt}'
     curr_outdir.mkdir(parents=True)
-    logger.add(curr_outdir / f'run_all_{dt}.log')
+    logger.add(curr_outdir / f'run4snippets_{dt}.log')
 
     output_length = [0]  # Use list to allow modification in callback
 
