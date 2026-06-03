@@ -18,6 +18,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-06-03
+
 ## Changed
 
 * `run4snippets` will output to directory starting with 'run4snippets_{date}', updated tests
@@ -257,7 +259,9 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.6.1...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.6.2...HEAD
+
+[0.6.2]: https://github.com/kpwhri/konsepy/compare/v0.6.1...v0.6.2
 
 [0.6.1]: https://github.com/kpwhri/konsepy/compare/v0.6.0...v0.6.1
 
