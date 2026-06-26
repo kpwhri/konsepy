@@ -166,6 +166,9 @@ Output:
 
 Optional function, list, or tuple of functions.
 
+Preprocessor regions are useful when context checks should stay inside a
+specific section or sentence.
+
 Preprocessors receive the full text and should return or yield searchable
 `(start, end)` regions.
 
@@ -174,6 +177,15 @@ They may return or yield:
 - `None`, which is ignored
 - `(start, end)`, which is searched
 - `(start, start)`, which is ignored
+
+Preprocessor regions also bound context windows. When a match is found inside a
+preprocessor region, postprocessors receive `precontext`, `postcontext`, and
+`around` values clipped to that region. This applies to both character-based
+`window` context and word-based `word_window` context.
+
+If multiple preprocessors or multiple yielded regions overlap, the same text may
+be matched more than once. Use `suppress_overlaps=True` if earlier matches should
+prevent later overlapping matches from being emitted.
 
 Example:
 
@@ -235,6 +247,55 @@ Output:
 ```python
 ['HERO', 'PLACE']
 ```
+
+```python
+import re
+
+from konsepy.rxsearch import search_all_regex
+
+
+def middle_sentence(text):
+    start = text.index('Ilmarinen')
+    end = text.index('. Väinämöinen')
+    yield start, end
+
+
+def classify_if_context_stays_in_region(*, precontext, postcontext, around, **_):
+    print(precontext)
+    print(postcontext)
+    print(around)
+    return 'HERO'
+
+
+REGEXES = [
+    (
+        re.compile(r'forged'),
+        None,
+        classify_if_context_stays_in_region,
+        middle_sentence,
+    ),
+]
+
+search = search_all_regex(REGEXES, window=100)
+
+print(list(search('Louhi watched. Ilmarinen forged the Sampo. Väinämöinen sang.')))
+```
+
+Output:
+
+```python
+Ilmarinen
+the
+Sampo
+Ilmarinen
+forged
+the
+Sampo
+['HERO']
+```
+
+Although `window=100`, the context does not include text before `Ilmarinen` or
+after `Sampo` because the preprocessor limited the searchable region.
 
 ## First result only
 
@@ -444,12 +505,64 @@ extracted value is passed to postprocessors as:
 - `extracted_postcontext`: postcontext started at the target
 - `extracted_around`: precontext and postcontext started at the target
 
+Extracted context uses the same `window` or `word_window` settings as match
+context. If the regex was found inside a preprocessor region, extracted context
+is also clipped to that region.
+
 If a postprocessor returns `None`, the extracted value is returned.
 
 If a postprocessor returns `SKIP`, the match is skipped.
 
 If a postprocessor returns any other value, that value replaces the extracted
 value.
+
+For extraction helpers, target context is centered on the extracted group rather
+than the whole regex match.
+
+```python
+import re
+
+from konsepy.rxsearch import extract_all_regex_target
+
+
+def score_sentence(text):
+    start = text.index('score')
+    end = text.index('. Väinämöinen')
+    yield start, end
+
+
+def inspect_context(*, extracted, extracted_precontext, extracted_postcontext, **_):
+    print(extracted)
+    print(extracted_precontext)
+    print(extracted_postcontext)
+    return None
+
+
+REGEXES = [
+    (
+        re.compile(r'score:\s*(?P<target>\d+)'),
+        None,
+        inspect_context,  # postprocessor
+        score_sentence,  # preprocessor
+    ),
+]
+
+extract = extract_all_regex_target(REGEXES, transform=int, window=100)
+
+print(list(extract('Louhi watched. score: 3. Väinämöinen sang.')))
+```
+
+Output:
+
+```python
+3
+score:
+
+[3]
+```
+
+The extracted precontext is `score: `, not `Louhi watched. score: `, because the
+preprocessor region begins at `score`.
 
 ## Use extraction as a postprocessor
 
@@ -536,7 +649,6 @@ REGEXES = [
     ),
 ]
 
-
 RUN_REGEXES_FUNC = extract_all_regex_target(REGEXES, transform=int)
 ```
 
@@ -593,6 +705,10 @@ Output:
 
 Pass `ignore_indices=True` to search the whole text even when preprocessors are
 defined. This is mainly useful in tests.
+
+When `ignore_indices=True`, preprocessor regions are not used for searching or
+for context clipping. Postprocessors receive full-text context limited only by
+`window` or `word_window`.
 
 ```python
 import re

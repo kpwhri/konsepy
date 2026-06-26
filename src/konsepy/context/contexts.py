@@ -1,12 +1,12 @@
 import re
 
 
-def get_precontext(m, text, window=20, start=None, word_window=None):
+def get_precontext(m, text, window=20, start=None, word_window=None, region_start=0):
     if start is None:
         start = m.start()
     if word_window:
         # for simplicity and correctness, we search backwards from start
-        prefix = text[:start]
+        prefix = text[region_start:start]
         # find word boundaries
         words = re.findall(r'\w+', prefix)
         if len(words) > word_window:
@@ -17,40 +17,40 @@ def get_precontext(m, text, window=20, start=None, word_window=None):
                 return prefix[target_match.start():]
         return prefix
 
-    return text[max(0, start - window): start]
+    return text[max(region_start, start - window): start]
 
 
-def get_postcontext(m, text, window=20, end=None, word_window=None):
+def get_postcontext(m, text, window=20, end=None, word_window=None, region_end=None):
     if end is None:
         end = m.end()
     if word_window:
-        suffix = text[end:]
+        suffix = text[end:region_end]
         matches = list(re.finditer(r'\w+', suffix))
         if len(matches) >= word_window:
             target_match = matches[word_window - 1]
             return suffix[:target_match.end()]
         return suffix
 
-    return text[end: end + window]
+    return text[end: min(region_end, end + window) if region_end else end + window]
 
 
-def get_around(m, text, window=20, start=None, end=None, word_window=None):
+def get_around(m, text, window=20, start=None, end=None, word_window=None, region=(0, None)):
     if start is None:
         start = m.start()
     if end is None:
         end = m.end()
     if word_window:
-        pre = get_precontext(m, text, start=start, word_window=word_window)
-        post = get_postcontext(m, text, end=end, word_window=word_window)
+        pre = get_precontext(m, text, start=start, word_window=word_window, region_start=region[0])
+        post = get_postcontext(m, text, end=end, word_window=word_window, region_end=region[1])
         return pre + text[start:end] + post
 
-    return text[max(0, start - window): end + window]
+    return text[max(region[0], start - window): min(region[1], end + window) if region[1] else end + window]
 
 
-def get_precontext_by_index(start, text, window=20, word_window=None):
+def get_precontext_by_index(start, text, window=20, word_window=None, region_start=0):
     if word_window:
         # for simplicity and correctness, we search backwards from start
-        prefix = text[:start]
+        prefix = text[region_start:start]
         # find word boundaries
         words = re.findall(r'\w+', prefix)
         if len(words) > word_window:
@@ -61,36 +61,40 @@ def get_precontext_by_index(start, text, window=20, word_window=None):
                 return prefix[target_match.start():]
         return prefix
 
-    return text[max(0, start - window): start]
+    return text[max(region_start, start - window): start]
 
 
-def get_postcontext_by_index(end, text, window=20, word_window=None):
+def get_postcontext_by_index(end, text, window=20, word_window=None, region_end=None):
     if word_window:
-        suffix = text[end:]
+        suffix = text[end:region_end]
         matches = list(re.finditer(r'\w+', suffix))
         if len(matches) >= word_window:
             target_match = matches[word_window - 1]
             return suffix[:target_match.end()]
         return suffix
 
-    return text[end: end + window]
+    return text[end: min(region_end, end + window) if region_end else end + window]
 
 
-def get_around_by_index(start, end, text, window=20, word_window=None):
+def get_around_by_index(start, end, text, window=20,
+                        word_window=None, region=(0, None)):
     if word_window:
-        pre = get_precontext(start, text, start=start, word_window=word_window)
-        post = get_postcontext(end, text, end=end, word_window=word_window)
+        pre = get_precontext(start, text, start=start, word_window=word_window, region_start=region[0])
+        post = get_postcontext(end, text, end=end, word_window=word_window, region_end=region[1])
         return pre + text[start:end] + post
 
-    return text[max(0, start - window): end + window]
+    return text[max(region[0], start - window): min(region[1], end + window) if region[1] else end + window]
 
 
-def get_contexts(m, text, window=20, context_match=None, context_window=None, context_direction=0, word_window=None):
+def get_contexts(m, text, window=20, context_match=None, context_window=None, context_direction=0,
+                 word_window=None, region=(0, None)):
     """
     if matching on context of a previous match, the offsets will need to be updated. To do this, use:
         * context_match: previous match
         * context_window: previous window (supplied by `window` parameter)
         * context_direction: -1 for previous context, 1 for post-context
+
+    `region`: allows limiting the contexts obtained to a particular region
     """
     if context_match:
         if context_direction == -1:
@@ -104,13 +108,13 @@ def get_contexts(m, text, window=20, context_match=None, context_window=None, co
         else:
             raise ValueError(fr'Unrecognized context direction: {context_direction};'
                              ' expected -1 [before] or +1 [after]')
-        precontext = get_precontext(m, text, window, start=start, word_window=word_window)
-        postcontext = get_postcontext(m, text, window, end=end, word_window=word_window)
-        around = get_around(m, text, window, start=start, end=end, word_window=word_window)
+        precontext = get_precontext(m, text, window, start=start, word_window=word_window, region_start=region[0])
+        postcontext = get_postcontext(m, text, window, end=end, word_window=word_window, region_end=region[1])
+        around = get_around(m, text, window, start=start, end=end, word_window=word_window, region=region)
     else:
-        precontext = get_precontext(m, text, window, word_window=word_window)
-        postcontext = get_postcontext(m, text, window, word_window=word_window)
-        around = get_around(m, text, window, word_window=word_window)
+        precontext = get_precontext(m, text, window, word_window=word_window, region_start=region[0])
+        postcontext = get_postcontext(m, text, window, word_window=word_window, region_end=region[1])
+        around = get_around(m, text, window, word_window=word_window, region=region)
     return {
         'm': m,
         'precontext': precontext,
@@ -123,16 +127,18 @@ def get_contexts(m, text, window=20, context_match=None, context_window=None, co
 
 
 def get_contexts_by_index(start, end, text, window=20, context_match=None, context_window=None, context_direction=0,
-                          word_window=None):
+                          word_window=None, region=(0, None)):
     """
     if matching on context of a previous match, the offsets will need to be updated. To do this, use:
         * context_match: previous match
         * context_window: previous window (supplied by `window` parameter)
         * context_direction: -1 for previous context, 1 for post-context
+
+    `region`: allows limiting the contexts obtained to a particular region
     """
-    precontext = get_precontext_by_index(start, text, window, word_window=word_window)
-    postcontext = get_postcontext_by_index(end, text, window, word_window=word_window)
-    around = get_around_by_index(start, end, text, window, word_window=word_window)
+    precontext = get_precontext_by_index(start, text, window, word_window=word_window, region_start=region[0])
+    postcontext = get_postcontext_by_index(end, text, window, word_window=word_window, region_end=region[1])
+    around = get_around_by_index(start, end, text, window, word_window=word_window, region=region)
     return {
         'precontext': precontext,
         'postcontext': postcontext,

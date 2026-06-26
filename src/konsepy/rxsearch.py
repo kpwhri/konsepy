@@ -162,7 +162,7 @@ def _search_regex(regexes, window=_DEFAULT_WINDOW, word_window=None, *, extracto
                     if suppress_overlaps and claimed_spans.overlaps(m.start(), m.end()):
                         continue
 
-                    contexts = get_contexts(m, text, window, word_window=word_window)
+                    contexts = get_contexts(m, text, window, word_window=word_window, region=(start, end))
                     default_result = category
                     
                     if extractor is not None:
@@ -176,7 +176,7 @@ def _search_regex(regexes, window=_DEFAULT_WINDOW, word_window=None, *, extracto
 
                         if extracted is not None:
                             ext_contexts = get_contexts_by_index(ext_start, ext_end, text, window,
-                                                                 word_window=word_window)
+                                                                 word_window=word_window, region=(start, end))
                             contexts['extracted_precontext'] = ext_contexts['precontext']
                             contexts['extracted_postcontext'] = ext_contexts['postcontext']
                             contexts['extracted_around'] = ext_contexts['around']

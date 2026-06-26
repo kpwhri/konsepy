@@ -977,3 +977,227 @@ def test_extract_target_extracted_context():
     assert list(extract('score: 3')) == []
 
 
+def test_preprocessor_region_excludes_partial_match_crossing_region_boundary():
+    text = 'old Ilmarinen forged'
+
+    def ilmarinen_only(text):
+        start = text.index('Ilmarinen')
+        yield start, start + len('Ilmarinen')
+
+    regexes = [
+        (re.compile(r'old\s+Ilmarinen'), Category.HERO, None, ilmarinen_only),
+    ]
+
+    search = search_all_regex(regexes)
+
+    assert list(search(text)) == []
+
+
+def test_preprocessor_can_return_duplicate_regions_and_duplicate_matches_are_returned():
+    text = 'Ilmarinen forged'
+
+    def same_region_twice(text):
+        yield 0, len(text)
+        yield 0, len(text)
+
+    regexes = [
+        (re.compile(r'Ilmarinen'), Category.HERO, None, same_region_twice),
+    ]
+
+    search = search_all_regex(regexes)
+
+    assert list(search(text)) == [Category.HERO, Category.HERO]
+
+
+def test_preprocessor_duplicate_regions_can_be_deduplicated_by_suppress_overlaps():
+    text = 'Ilmarinen forged'
+
+    def same_region_twice(text):
+        yield 0, len(text)
+        yield 0, len(text)
+
+    regexes = [
+        (re.compile(r'Ilmarinen'), Category.HERO, None, same_region_twice),
+    ]
+
+    search = search_all_regex(regexes, suppress_overlaps=True)
+
+    assert list(search(text)) == [Category.HERO]
+
+
+def test_preprocessor_overlapping_regions_can_emit_same_match_more_than_once():
+    text = 'Aino Ilmarinen Louhi'
+
+    def overlapping_regions(text):
+        yield 0, text.index('Louhi')
+        yield text.index('Ilmarinen'), len(text)
+
+    regexes = [
+        (re.compile(r'Ilmarinen'), Category.HERO, None, overlapping_regions),
+    ]
+
+    search = search_all_regex(regexes)
+
+    assert list(search(text)) == [Category.HERO, Category.HERO]
+
+
+def test_preprocessor_overlapping_regions_respect_suppress_overlaps():
+    text = 'Aino Ilmarinen Louhi'
+
+    def overlapping_regions(text):
+        yield 0, text.index('Louhi')
+        yield text.index('Ilmarinen'), len(text)
+
+    regexes = [
+        (re.compile(r'Ilmarinen'), Category.HERO, None, overlapping_regions),
+    ]
+
+    search = search_all_regex(regexes, suppress_overlaps=True)
+
+    assert list(search(text)) == [Category.HERO]
+
+
+def test_postprocessor_context_is_limited_to_preprocessor_region():
+    text = 'Louhi watched. Ilmarinen forged the Sampo. Väinämöinen sang.'
+    seen = {}
+
+    def inspect_context(**context):
+        seen.update(context)
+        return Category.HERO
+
+    def middle_sentence(text):
+        start = text.index('Ilmarinen')
+        end = text.index('. Väinämöinen')
+        yield start, end
+
+    regexes = [
+        (re.compile(r'forged'), Category.UNKNOWN, inspect_context, middle_sentence),
+    ]
+
+    search = search_all_regex(regexes, window=100)
+
+    assert list(search(text)) == [Category.HERO]
+    assert seen['precontext'] == 'Ilmarinen '
+    assert seen['postcontext'] == ' the Sampo'
+    assert seen['around'] == 'Ilmarinen forged the Sampo'
+
+
+def test_postprocessor_word_context_is_limited_to_preprocessor_region():
+    text = 'Louhi watched. Ilmarinen forged the Sampo. Väinämöinen sang.'
+    seen = {}
+
+    def inspect_context(**context):
+        seen.update(context)
+        return Category.HERO
+
+    def middle_sentence(text):
+        start = text.index('Ilmarinen')
+        end = text.index('. Väinämöinen')
+        yield start, end
+
+    regexes = [
+        (re.compile(r'Sampo'), Category.UNKNOWN, inspect_context, middle_sentence),
+    ]
+
+    search = search_all_regex(regexes, word_window=4)
+
+    assert list(search(text)) == [Category.HERO]
+    assert seen['precontext'] == 'Ilmarinen forged the '
+    assert seen['postcontext'] == ''
+    assert seen['around'] == 'Ilmarinen forged the Sampo'
+
+
+def test_ignore_indices_uses_full_text_context_when_preprocessor_region_would_limit_it():
+    text = 'Louhi watched. Ilmarinen forged the Sampo. Väinämöinen sang.'
+    seen = {}
+
+    def inspect_context(**context):
+        seen.update(context)
+        return Category.HERO
+
+    def middle_sentence(text):
+        start = text.index('Ilmarinen')
+        end = text.index('. Väinämöinen')
+        yield start, end
+
+    regexes = [
+        (re.compile(r'Ilmarinen'), Category.UNKNOWN, inspect_context, middle_sentence),
+    ]
+
+    search = search_all_regex(regexes, window=100)
+
+    assert list(search(text, ignore_indices=True)) == [Category.HERO]
+    assert seen['precontext'] == 'Louhi watched. '
+    assert seen['postcontext'] == ' forged the Sampo. Väinämöinen sang.'
+
+
+def test_extract_target_context_should_use_search_region_boundaries():
+    text = 'Louhi watched. score: 3. Väinämöinen sang.'
+    seen = {}
+
+    def inspect_extracted_context(**context):
+        seen.update(context)
+        return None
+
+    def score_sentence(text):
+        start = text.index('score')
+        end = text.index('. Väinämöinen')
+        yield start, end
+
+    regexes = [
+        (
+            re.compile(r'score:\s*(?P<target>\d+)'),
+            None,
+            inspect_extracted_context,
+            score_sentence,
+        ),
+    ]
+
+    extract = extract_all_regex_target(regexes, transform=int, window=100)
+
+    assert list(extract(text)) == [3]
+    assert seen['extracted_precontext'] == 'score: '
+    assert seen['extracted_postcontext'] == ''
+    assert seen['extracted_around'] == 'score: 3'
+
+
+@pytest.mark.parametrize('region_start_text, region_end_text, expected', [
+    ('Aino', 'Aino', []),
+    ('Aino', 'Ilmarinen', [Category.HERO]),
+    ('Ilmarinen', 'Louhi', [Category.HERO]),
+    ('Louhi', 'Louhi', []),
+])
+def test_preprocessor_region_boundaries(region_start_text, region_end_text, expected):
+    text = 'Aino Ilmarinen Louhi'
+
+    def selected_region(text):
+        start = text.index(region_start_text)
+        end = text.index(region_end_text) + len(region_end_text)
+        yield start, end
+
+    regexes = [
+        (re.compile(r'Ilmarinen'), Category.HERO, None, selected_region),
+    ]
+
+    search = search_all_regex(regexes)
+
+    assert list(search(text)) == expected
+
+
+def test_multiple_preprocessors_continue_after_one_returns_none():
+    text = 'Aino Ilmarinen Louhi'
+
+    def no_regions(text):
+        return None
+
+    def ilmarinen_region(text):
+        start = text.index('Ilmarinen')
+        yield start, start + len('Ilmarinen')
+
+    regexes = [
+        (re.compile(r'Aino|Ilmarinen|Louhi'), Category.HERO, None, [no_regions, ilmarinen_region]),
+    ]
+
+    search = search_all_regex(regexes)
+
+    assert list(search(text)) == [Category.HERO]
