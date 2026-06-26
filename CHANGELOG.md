@@ -18,6 +18,8 @@ Types of changes:
 
 ## [Unreleased]
 
+## [0.6.3]
+
 ### Fixed
 
 * Postprocessors and context are only pulled from the region selected by the preprocessor. 
