@@ -55,6 +55,7 @@ def run_all(input_files, outdir: pathlib.Path, package_name: str, *,
                     'text': text if include_text_output else None,
                     'concept': concept.name,
                     'matches': [m.group() for m in matches] if matches else None,
+                    'offsets': [(m.start(), m.end()) for m in matches] if matches else None,
                     'categories': output_categories,
                 }) + '\n')
             if not incremental_output_only:

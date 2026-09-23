@@ -18,11 +18,21 @@ Types of changes:
 
 ## [Unreleased]
 
+### Added
+
+* Added approximate indices/offsets to the `output.jsonl`. These might not be exact so more work is need to ensure these
+  are accurate. For now, they provide an ordered estimate.
+
+### Fixed
+
+* Searching precontext would find the first match (rather than last). The first match is more likely to have an
+  intervening, banned boundary character.
+
 ## [0.6.3]
 
 ### Fixed
 
-* Postprocessors and context are only pulled from the region selected by the preprocessor. 
+* Postprocessors and context are only pulled from the region selected by the preprocessor.
 
 ## [0.6.2] - 2026-06-03
 

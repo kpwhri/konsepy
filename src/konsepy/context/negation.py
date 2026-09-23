@@ -1,6 +1,7 @@
 import re
 
 from konsepy.context.contexts import get_contexts
+from konsepy.context.utils import matches_pre, matches_post
 from konsepy.rxsearch import SKIP
 
 DEFAULT_PRENEG_PAT = re.compile(
@@ -60,16 +61,8 @@ def has_negation(text, direction=0, prenegation_pat=DEFAULT_PRENEG_PAT,
 
 
 def has_prenegation(text, prenegation_pat=DEFAULT_PRENEG_PAT, banned_characters='.'):
-    if m := prenegation_pat.search(text):
-        for ch in banned_characters:
-            if ch in text[m.end():]:
-                return None
-        return m
+    return matches_pre(prenegation_pat, text, banned_characters)
 
 
 def has_postnegation(text, postnegation_pat=DEFAULT_POSTNEG_PAT, banned_characters='.'):
-    if m := postnegation_pat.search(text):
-        for ch in banned_characters:
-            if ch in text[:m.start()]:
-                return None
-        return m
+    return matches_post(postnegation_pat, text, banned_characters)

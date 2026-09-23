@@ -1,5 +1,7 @@
 import re
 
+from konsepy.context.utils import get_last_match, matches_pre, matches_post
+
 
 def get_precontext(m, text, window=20, start=None, word_window=None, region_start=0):
     if start is None:
@@ -151,20 +153,14 @@ def get_contexts_by_index(start, end, text, window=20, context_match=None, conte
 
 def check_if_pattern_after(pattern, m, text, window=20, banned_characters='.', end=None, return_concept=None, **kwargs):
     postcontext = get_postcontext(m, text, window=window, end=end)
-    if m2 := pattern.search(postcontext):
-        for ch in banned_characters:
-            if ch in postcontext[:m2.start()]:
-                return None
+    if m2 := matches_post(pattern, postcontext, banned_characters=banned_characters):
         return m2 if return_concept is None else return_concept
 
 
 def check_if_pattern_before(pattern, m, text, window=20, banned_characters='.', start=None, return_concept=None,
                             **kwargs):
     precontext = get_precontext(m, text, window=window, start=start)
-    if m2 := pattern.search(precontext):
-        for ch in banned_characters:
-            if ch in precontext[m2.end():]:
-                return None
+    if m2 := matches_pre(pattern, precontext, banned_characters=banned_characters):
         return m2 if return_concept is None else return_concept
 
 

@@ -1,6 +1,7 @@
 import re
 
 from konsepy.context.contexts import get_contexts
+from konsepy.context.utils import matches_pre, matches_post
 from konsepy.rxsearch import SKIP
 
 OTHER_SUBJECT = [
@@ -30,16 +31,10 @@ def has_other_subject(text, direction=0, other_subject_rx=OTHER_SUBJECT_RX, bann
 
     direction = set to -1 (precontext) or 1 (postcontext) to ensure is in same sentence
     """
-    if m := other_subject_rx.search(text):
-        if direction == -1:  # precontext
-            for ch in banned_characters:
-                if ch in text[m.end():]:
-                    return None
-        elif direction == 1:  # postcontext
-            for ch in banned_characters:
-                if ch in text[:m.start()]:
-                    return None
-        return m
+    if direction == -1:  # precontext
+        return matches_pre(other_subject_rx, text, banned_characters)
+    elif direction == 1:  # postcontext
+        return matches_post(other_subject_rx, text, banned_characters)
     return None
 
 
