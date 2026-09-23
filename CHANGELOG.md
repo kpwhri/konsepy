@@ -16,7 +16,7 @@ Types of changes:
 * `Fixed`: for any bug fixes.
 * `Security`: in case of vulnerabilities.
 
-## [Unreleased]
+## [0.6.4] - 2026-09-22
 
 ### Added
 
@@ -275,7 +275,11 @@ Types of changes:
 
 * Argument descriptions for column labels
 
-[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.6.2...HEAD
+[unreleased]: https://github.com/kpwhri/konsepy/compare/v0.6.4...HEAD
+
+[0.6.4]: https://github.com/kpwhri/konsepy/compare/v0.6.3...v0.6.4
+
+[0.6.3]: https://github.com/kpwhri/konsepy/compare/v0.6.2...v0.6.3
 
 [0.6.2]: https://github.com/kpwhri/konsepy/compare/v0.6.1...v0.6.2
 
